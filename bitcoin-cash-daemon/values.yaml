@@ -1,0 +1,85 @@
+# Default values for bitcoin-cash-daemon.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+replicaCount: 1
+
+net: mainnet
+
+image:
+  name: registry.gitlab.com/thorchain/devops/node-launcher
+  tag: "bitcoin-cash-daemon-28.0.1"
+  hash: "dd6112d8c336ad64440ffa2702cc8d367a8f23cd5800487eecc1e0d5bd640d6a"
+
+imagePullSecrets: []
+nameOverride: ""
+fullnameOverride: ""
+
+persistence:
+  enabled: true
+  size:
+    stagenet: 400Gi
+    mainnet: 400Gi
+  accessMode: ReadWriteOnce
+  # storageClass: "-"
+
+podSecurityContext:
+  fsGroup: 1000
+
+securityContext:
+  {}
+  # capabilities:
+  #   drop:
+  #   - ALL
+  # readOnlyRootFilesystem: true
+  # runAsNonRoot: true
+  # runAsUser: 1000
+
+service:
+  type: ClusterIP
+  port:
+    mainnet:
+      p2p: 8333
+      rpc: 8332
+    stagenet:
+      p2p: 8333
+      rpc: 8332
+
+ingress:
+  enabled: false
+  annotations:
+    {}
+    # kubernetes.io/ingress.class: nginx
+    # cert-manager.io/cluster-issuer: letsencrypt-production
+  hosts:
+    []
+    # - host: midgard.example.com
+    #   paths:
+    #   - path: /
+    #     pathType: ImplementationSpecific
+    #     backend:
+    #       service
+    #         name: gateway
+    #         port:
+    #           name: midgard
+  tls:
+    []
+    # - secretName: midgard-tls
+    #   hosts:
+    #     - midgard.example.com
+
+resources:
+  limits:
+    # cpu: 1
+    memory: 5Gi
+  requests:
+    cpu: 1
+    memory: 5Gi
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}
+
+global: {}

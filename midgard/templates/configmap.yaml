@@ -1,0 +1,84 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "midgard.fullname" . }}-config
+data:
+  init-genesis.sh: |
+    #!/bin/sh
+    if [[ -f /blockstore/genesis.json ]]; then
+      exit 0
+    fi
+    wget -q -O- {{ .Values.genesis.remote }} | jq -r .result.genesis > /blockstore/genesis.json
+
+  entrypoint.sh: |
+    #!/bin/sh
+
+    # get ordinal index of stateful set from hostname
+    INDEX=${HOSTNAME##*-}
+    sed -e "s/HOST_TIMESCALEDB/{{ include "midgard.fullname" . }}-timescaledb-${INDEX}.{{ include "midgard.fullname" . }}-timescaledb/g" /config.json.tpl >/config.json
+    /midgard /config.json
+
+  config.json: |
+    {
+      "listen_port": {{ .Values.service.port }},
+      "thorchain": {
+        "tendermint_url": "http://{{ include "midgard.thorDaemon" . }}/websocket",
+        "thornode_url": "http://{{ .Values.thorApi }}/thorchain",
+        "last_chain_backoff": "7s",
+        "fork_infos": [
+{{- if eq "mainnet" .Values.net }}
+          {
+            "chain_id": "thorchain",
+            "earliest_block_hash": "7D37DEF6E1BE23C912092069325C4A51E66B9EF7DDBDE004FF730CFABC0307B1",
+            "earliest_block_height": 1,
+            "hard_fork_height": 4786559
+          },
+          {
+            "chain_id": "thorchain-mainnet-v1",
+            "parent_chain_id": "thorchain",
+            "earliest_block_hash": "9B86543A5CF5E26E3CE93C8349B2EABE5E238DFFC9EBE8EC6207FE7178FF27AC",
+            "earliest_block_height": 4786560,
+            "hard_fork_height": 17562000
+          },
+          {
+            "chain_id": "thorchain-1",
+            "parent_chain_id": "thorchain-mainnet-v1",
+            "earliest_block_hash": "0B3C8F9E3EA7E9B1C10CAC5217ED771E0540671EFB9C5315BF01167266BCBEDF",
+            "earliest_block_height": 17562001
+          }
+  {{- end }}
+  {{- if eq "stagenet" .Values.net }}
+          {
+            "chain_id": "thorchain-stagenet-1",
+            "earliest_block_hash": "E0F77EE63D901B41F51D62977B7034A11EA65CBC9C3C9057BF0B657FF27B908D",
+            "earliest_block_height": 1,
+            "hard_fork_height": 12500
+          },
+          {
+            "chain_id": "thorchain-stagenet-2",
+            "parent_chain_id": "thorchain-stagenet-1",
+            "earliest_block_hash": "6F872F4DBF9D52AAE14F2296941C3A90F07D312634EC192AABAF02643047B82E",
+            "earliest_block_height": 12501
+          }
+  {{- end }}
+        ]
+      },
+      "timescale": {
+        "host": "HOST_TIMESCALEDB",
+        "port": {{ .Values.postgres.port }},
+        "user_name": "{{ .Values.postgres.username }}",
+        "password": "{{ .Values.postgres.password }}",
+        "database": "{{ .Values.postgres.database }}",
+        "sslmode": "disable",
+        "max_open_conns": 80
+      },
+      "usdpools": [
+        "BNB.BUSD-BD1",
+        "BNB.BUSD-BAF",
+        "BNB.USDT-DC8",
+        "ETH.USDT-0X62E273709DA575835C7F6AEF4A31140CA5B1D190",
+        "ETH.USDT-0XDAC17F958D2EE523A2206206994597C13D831EC7",
+        "AVAX.USDC-0XB97EF9EF8734C71904D8002F8B6BC66DD9C48A6E",
+        "ETH.USDC-0XA0B86991C6218B36C1D19D4A2E9EB0CE3606EB48"
+      ]
+    }

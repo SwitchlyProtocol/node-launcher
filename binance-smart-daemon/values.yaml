@@ -1,0 +1,85 @@
+# Default values for binance-smart-daemon.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+net: mainnet
+
+replicaCount: 1
+
+image:
+  name: registry.gitlab.com/thorchain/devops/node-launcher
+  tag: "binance-smart-daemon-1.4.16"
+  hash: "cee73260a00a17ec2d4eb5a8ed20e87c2a21a4422cd9ce4a47df73e0aa5a744f"
+
+# type of snapshot to take, either "full" or "fast"
+# see: https://github.com/48Club/bsc-snapshots?tab=readme-ov-file#geth
+snapshotType: "fast"
+
+imagePullSecrets: []
+nameOverride: ""
+fullnameOverride: ""
+
+podSecurityContext:
+  fsGroup: 1000
+
+securityContext:
+  {}
+  # capabilities:
+  #   drop:
+  #   - ALL
+  # readOnlyRootFilesystem: true
+  # runAsNonRoot: true
+  # runAsUser: 1000
+
+service:
+  type: ClusterIP
+  port: 8545
+
+ingress:
+  enabled: false
+  annotations:
+    {}
+    # kubernetes.io/ingress.class: nginx
+    # cert-manager.io/cluster-issuer: letsencrypt-production
+  hosts:
+    []
+    # - host: midgard.example.com
+    #   paths:
+    #   - path: /
+    #     backend:
+    #       serviceName: gateway
+    #       servicePort: midgard
+  tls:
+    []
+    # - secretName: midgard-tls
+    #   hosts:
+    #     - midgard.example.com
+
+persistence:
+  enabled: true
+  size: 6Ti
+  accessMode: ReadWriteOnce
+  # storageClass: "-"
+  #
+  #
+resources:
+  limits:
+    # cpu: 12
+    # memory: 64Gi
+  requests:
+    # NOTE: Usage is dependent on how many Bifrosts leverage the daemon, nodes using shared daemons may require more.
+    cpu: 4
+    memory: 30Gi
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}
+
+# necessary for lint
+global:
+  images:
+    alpine:
+      tag: foo
+      hash: bar

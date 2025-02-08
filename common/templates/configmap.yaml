@@ -1,0 +1,28 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: utxo-scripts
+data:
+  ready.sh: |
+    #!/bin/bash
+    set -euo pipefail
+
+    SIGNER_NAME="${SIGNER_NAME:=thorchain}"
+    SIGNER_PASSWD="${SIGNER_PASSWD:=password}"
+    BTC_HOST=http://${SIGNER_NAME}:${SIGNER_PASSWD}@localhost:8332
+
+    STATUS=$(wget -q -nv -O- --post-data='{"jsonrpc": "1.0", "id": "node-status", "method": "getblockchaininfo", "params": []}' --header 'content-type: text/plain;' $BTC_HOST )
+    PROGRESS=$(jq -c '(.result.verificationprogress*100)' <<<$STATUS)
+    PROGRESS_TRUNC=$(sed -E 's/([+-]?[0-9.]+)\..*/\1/g' <<<$PROGRESS)
+
+    declare -i INT=0
+
+    INT=${PROGRESS_TRUNC}
+
+    if [[ $INT -ge 99 ]]; then
+      echo "GOOD progress is $INT%"
+      exit 0
+    else
+      echo "BAD progress is $INT%"
+      exit 1
+    fi

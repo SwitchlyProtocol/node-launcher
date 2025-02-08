@@ -1,0 +1,59 @@
+{{- if .Values.publicAlerts.enabled }}
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: public-alerts
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: {{ .Values.publicAlerts.pvc.size }}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: public-alerts
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: public-alerts
+  template:
+    metadata:
+      labels:
+        app: public-alerts
+    spec:
+      securityContext:
+        fsGroup: 101  # matches image user
+      containers:
+        - name: public-alerts
+          image: {{ .Values.publicAlerts.image.name }}:{{ .Values.publicAlerts.image.tag }}@sha256:{{ .Values.publicAlerts.image.hash }}
+          imagePullPolicy: IfNotPresent
+          env:
+            {{- range $key, $value := .Values.publicAlerts.env }}
+            - name: {{ $key }}
+              value: {{ $value | quote }}
+            {{- end }}
+            {{- range $key, $value := .Values.publicAlerts.secretEnv }}
+            - name: {{ $key }}
+              valueFrom:
+                secretKeyRef:
+                  key: {{ $value | quote }}
+                  name: provider
+            {{- end }}
+          volumeMounts:
+            - name: data
+              mountPath: /data
+          resources:
+            requests:
+              cpu: 50m
+              memory: 128Mi
+            limits:
+              cpu: 100m
+              memory: 256Mi
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: public-alerts
+{{- end }}

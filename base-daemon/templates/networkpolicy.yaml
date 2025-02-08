@@ -1,0 +1,39 @@
+# Block all outbound connections to cluster-internal addresses, except Ethereum.
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: {{ .Chart.Name }}
+spec:
+  podSelector:
+    matchLabels:
+      network-policy: {{ .Chart.Name }}
+  policyTypes:
+    - Egress
+  egress:
+    - to: # Allow connection to ethereum pod
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/name: ethereum-daemon
+      ports:
+        - protocol: TCP
+          port: 8545
+        - protocol: TCP
+          port: 3500 # beacon
+    - to: # Allow connection to all IPs except the private ranges
+        - ipBlock:
+            cidr: 0.0.0.0/0
+            except:
+              - 10.0.0.0/8
+              - 172.16.0.0/12
+              - 192.168.0.0/16
+    - to: # Still allow access to dns
+      ports:
+        - protocol: UDP
+          port: 53
+    - to: # Still allow access to istio
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: istio-system
+      ports:
+        - protocol: TCP
+          port: 15012

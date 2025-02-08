@@ -1,0 +1,36 @@
+global:
+  tag: mainnet-3.1.1
+  hash: 5a66401294a111a8bd249ab317e87a61fb44cf347b3a2a93fba1714735b8f93f
+
+thornode:
+  haltHeight:
+  statesync:
+    auto: false
+    snapshotInterval: 0
+
+bitcoin-daemon:
+  enabled: true
+
+litecoin-daemon:
+  enabled: true
+
+bitcoin-cash-daemon:
+  enabled: true
+
+ethereum-daemon:
+  enabled: true
+
+dogecoin-daemon:
+  enabled: true
+
+gaia-daemon:
+  enabled: true
+
+avalanche-daemon:
+  enabled: true
+
+binance-smart-daemon:
+  enabled: true
+
+base-daemon:
+  enabled: false

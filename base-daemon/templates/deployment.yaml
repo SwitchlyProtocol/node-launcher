@@ -1,0 +1,142 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Chart.Name }}
+spec:
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: {{ .Chart.Name }}
+  template:
+    metadata:
+      labels:
+        network-policy: {{ .Chart.Name }}
+        app.kubernetes.io/name: {{ .Chart.Name }}
+    spec:
+      automountServiceAccountToken: false
+      serviceAccountName: default
+    {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+    {{- end }}
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+
+      initContainers:
+        - name: {{ .Chart.Name }}-init
+          image: alpine:{{ .Values.global.images.alpine.tag }}@sha256:{{ .Values.global.images.alpine.hash }}
+          imagePullPolicy: IfNotPresent
+          volumeMounts:
+            - name: data
+              mountPath: /root
+            - name: scripts
+              mountPath: /scripts
+          command:
+            - /scripts/init.sh
+
+      containers:
+        - name: {{ .Chart.Name }}-execution
+          image: {{ .Values.image.execution.name }}:{{ .Values.image.execution.tag }}@sha256:{{ .Values.image.execution.hash }}
+          imagePullPolicy: IfNotPresent
+          command:
+            - geth
+            - --http
+            - --http.addr=0.0.0.0
+            - --http.port=8545
+            - --http.api=eth,net,engine,web3,personal,txpool,debug
+            - --http.corsdomain=*
+            - --http.vhosts=*
+            - --authrpc.vhosts=localhost
+            - --authrpc.jwtsecret=/root/jwt.hex
+            - --rollup.sequencerhttp=https://mainnet-sequencer.base.org
+            - --rollup.disabletxpoolgossip=true
+            - --op-network=base-mainnet
+            - --ws
+          volumeMounts:
+            - name: scripts
+              mountPath: /scripts
+            - name: data
+              mountPath: /root
+          env:
+            # Note: in the reference deployment the same .env file is
+            #   mapped in to both execution and beacon processes.
+            {{- range $key, $value := .Values.env.shared }}
+            - name: {{ $key }}
+              value: {{ $value | quote }}
+            {{- end }}
+          ports:
+            - name: rpc
+              containerPort: 8545
+              protocol: TCP
+          lifecycle:
+            preStop:
+              exec:
+                command:
+                  - sh
+                  - -c
+                  - "killall5 2 && sleep 10" # SIGINT and give 10s for main process to terminate
+          startupProbe:
+            failureThreshold: 600
+            periodSeconds: 10
+            timeoutSeconds: 10
+            exec:
+              command:
+                - /scripts/probe.sh
+          livenessProbe:
+            failureThreshold: 60
+            timeoutSeconds: 10
+            periodSeconds: 10
+            exec:
+              command:
+                - /scripts/probe.sh
+          readinessProbe:
+            timeoutSeconds: 10
+            exec:
+              command:
+                - test
+                - $(geth --datadir /root/.ethereum/base-mainnet attach --exec net.listening) == "true"
+          resources:
+            {{- toYaml .Values.resources.execution | nindent 12 }}
+
+        - name: {{ .Chart.Name }}-beacon
+          image: {{ .Values.image.beacon.name }}:{{ .Values.image.beacon.tag }}@sha256:{{ .Values.image.beacon.hash }}
+          imagePullPolicy: IfNotPresent
+          command:
+            - op-node
+          env:
+            {{- range $key, $value := .Values.env.shared }}
+            - name: {{ $key }}
+              value: {{ $value | quote }}
+            {{- end }}
+          ports:
+            - name: beacon
+              containerPort: 3500
+              protocol: TCP
+          volumeMounts:
+            - name: data
+              mountPath: /root
+          resources:
+            {{- toYaml .Values.resources.beacon | nindent 12 }}
+
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: {{ .Chart.Name }}
+        - name: scripts
+          configMap:
+            name: {{ .Chart.Name }}
+            defaultMode: 0777
+
+    {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+    {{- end }}
+    {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+    {{- end }}
+    {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+    {{- end }}

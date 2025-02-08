@@ -1,0 +1,41 @@
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: mirror-app
+data:
+  repos: |
+    gitlab.com/thorchain/thornode
+    gitlab.com/thorchain/devops/node-launcher
+    gitlab.com/thorchain/devops/cluster-launcher
+    gitlab.com/thorchain/midgard
+    gitlab.com/thorchain/tss/tss-lib
+    gitlab.com/thorchain/ledger-thorchain-go
+    github.com/asgardex/asgardex-desktop
+
+  entrypoint.sh: |
+    #!/usr/bin/env bash
+    set -euo pipefail
+
+    SRC_LIST="$1"
+    ROOT="$2"
+
+    # Sleep a random amount to prevent the thundering herd.
+    SLEEP=$(($RANDOM % 900))
+    echo "Sleeping $SLEEP seconds..."
+    sleep $SLEEP
+
+    get_sanitized_dir() {
+        local HASH=$(printf "%s" "$1" | sha256sum - | cut -c 1-8)
+        printf "%s-%s\n" "$HASH" "$1" | sed -Ee 's/[^A-Za-z0-9_.-]/_/g'
+    }
+
+    while IFS= read -r REPO; do
+        OUT="$ROOT"/$(get_sanitized_dir "$REPO")
+        if [ ! -d "$OUT" ]; then
+            git clone --mirror "https://${REPO}.git" "$OUT"
+        fi
+        pushd "$OUT"
+        git fetch --all
+        popd
+    done <"$SRC_LIST"

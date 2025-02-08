@@ -1,0 +1,105 @@
+{{- if .Values.events.enabled }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: events
+data:
+  entrypoint.sh: |
+    #!/bin/sh
+
+    # run the events daemon
+    events
+
+    # sleep 10 minutes on any crash to avoid potential notification spam
+    trap "sleep 600" EXIT
+
+    # return if no pagerduty routing key configured
+    if [ -z "${PAGERDUTY_ROUTING_KEY}" ]; then
+      exit
+    fi
+
+    BODY=$(
+      cat <<EOF
+    {
+      "payload": {
+        "summary": "Events Crash",
+        "source": "Events",
+        "severity": "critical"
+      },
+      "routing_key": "$PAGERDUTY_ROUTING_KEY",
+      "event_action": "trigger"
+    }
+    EOF
+    )
+
+    curl --request 'POST' \
+      --url https://events.pagerduty.com/v2/enqueue \
+      --header 'Content-Type: application/json' \
+      --data "${BODY}"
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: events
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: {{ .Values.events.pvc.size }}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: events
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: events
+  template:
+    metadata:
+      labels:
+        app: events
+    spec:
+      containers:
+        - name: events
+          image: {{ .Values.events.image.name }}:{{ .Values.events.image.tag }}@sha256:{{ .Values.events.image.hash }}
+          imagePullPolicy: IfNotPresent
+          env:
+            {{- range $key, $value := .Values.events.env }}
+            - name: {{ $key }}
+              value: {{ $value | quote }}
+            {{- end }}
+            {{- range $key, $value := .Values.events.secretEnv }}
+            - name: {{ $key }}
+              valueFrom:
+                secretKeyRef:
+                  key: {{ $value | quote }}
+                  name: provider
+            {{- end }}
+          command:
+            - /config/entrypoint.sh
+          volumeMounts:
+            - name: data
+              mountPath: /data
+            - name: config
+              mountPath: /config
+          resources:
+            requests:
+              cpu: {{ .Values.events.resources.requests.cpu }}
+              memory: {{ .Values.events.resources.requests.memory }}
+            limits:
+              cpu: {{ .Values.events.resources.limits.cpu }}
+              memory: {{ .Values.events.resources.limits.memory }}
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: events
+        - name: config
+          configMap:
+            name: events
+            defaultMode: 0755
+{{- end }}

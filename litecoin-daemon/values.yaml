@@ -1,0 +1,83 @@
+# Default values for litecoin-daemon.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+replicaCount: 1
+
+net: mainnet
+
+image:
+  name: registry.gitlab.com/thorchain/devops/node-launcher
+  tag: "litecoin-daemon-0.21.4"
+  hash: "72853e6e2f5fb45a2c3b9f3900005d2c1c1f1ba727800917d92da89b0484b385"
+
+imagePullSecrets: []
+nameOverride: ""
+fullnameOverride: ""
+
+persistence:
+  enabled: true
+  size:
+    stagenet: 300Gi
+    mainnet: 300Gi
+  accessMode: ReadWriteOnce
+  # storageClass: "-"
+
+podSecurityContext:
+  {}
+  # fsGroup: 2000
+
+securityContext:
+  {}
+  # capabilities:
+  #   drop:
+  #   - ALL
+  # readOnlyRootFilesystem: true
+  # runAsNonRoot: true
+  # runAsUser: 1000
+
+service:
+  type: ClusterIP
+  port:
+    mainnet:
+      p2p: 9333
+      rpc: 9332
+    stagenet:
+      p2p: 9333
+      rpc: 9332
+
+ingress:
+  enabled: false
+  annotations:
+    {}
+    # kubernetes.io/ingress.class: nginx
+    # cert-manager.io/cluster-issuer: letsencrypt-production
+  hosts:
+    []
+    # - host: midgard.example.com
+    #   paths:
+    #   - path: /
+    #     backend:
+    #       serviceName: gateway
+    #       servicePort: midgard
+  tls:
+    []
+    # - secretName: midgard-tls
+    #   hosts:
+    #     - midgard.example.com
+
+resources:
+  limits:
+    # cpu: 1
+    memory: 5Gi
+  requests:
+    cpu: 1
+    memory: 5Gi
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}
+
+global: {}

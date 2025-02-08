@@ -1,0 +1,77 @@
+# Default values for avalanche-daemon.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+net: mainnet
+
+replicaCount: 1
+
+image:
+  name: registry.gitlab.com/thorchain/devops/node-launcher
+  tag: "avalanche-daemon-1.12.1"
+  hash: 2d0128b4883c7ccef21eb4c9b1cdd3fd6c6437f196513fbf6303cd1d984e7c2a
+
+imagePullSecrets: []
+nameOverride: ""
+fullnameOverride: ""
+
+podSecurityContext:
+  {}
+  # fsGroup: 2000
+
+securityContext:
+  {}
+  # capabilities:
+  #   drop:
+  #   - ALL
+  # readOnlyRootFilesystem: true
+  # runAsNonRoot: true
+  # runAsUser: 1000
+
+service:
+  type: ClusterIP
+  port: 9650
+
+ingress:
+  enabled: false
+  annotations:
+    {}
+    # kubernetes.io/ingress.class: nginx
+    # cert-manager.io/cluster-issuer: letsencrypt-production
+  hosts:
+    []
+    # - host: midgard.example.com
+    #   paths:
+    #   - path: /
+    #     backend:
+    #       serviceName: gateway
+    #       servicePort: midgard
+  tls:
+    []
+    # - secretName: midgard-tls
+    #   hosts:
+    #     - midgard.example.com
+
+persistence:
+  enabled: true
+  size:
+    stagenet: 1Ti
+    mainnet: 1Ti
+  accessMode: ReadWriteOnce
+  # storageClass: "-"
+  #
+resources:
+  limits:
+    # cpu: 1
+    memory: 12Gi
+  requests:
+    cpu: 1
+    memory: 6Gi
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}
+
+global: {}
