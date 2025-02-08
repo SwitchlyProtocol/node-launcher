@@ -1,0 +1,82 @@
+# Default values for stellar-daemon.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+net: mainnet
+
+replicaCount: 1
+
+image:
+  stellar:
+    name: stellar/stellar-core
+    tag: "" # When tag is empty it defaults to the chart appVersion.
+    hash: "" # Add the appropriate hash for your stellar-core image
+  horizon:
+    name: stellar/horizon
+    tag: "latest" # Specify the desired version
+    hash: "" # Add the appropriate hash for your horizon image
+
+imagePullSecrets: []
+nameOverride: ""
+fullnameOverride: ""
+
+podSecurityContext: {}
+  # fsGroup: 2000
+
+securityContext: {}
+  # capabilities:
+  #   drop:
+  #   - ALL
+  # readOnlyRootFilesystem: true
+  # runAsNonRoot: true
+  # runAsUser: 1000
+
+service:
+  type: ClusterIP
+  port: 8000 # Default Horizon API port
+
+ingress:
+  enabled: false
+  annotations: {}
+    # kubernetes.io/ingress.class: nginx
+    # cert-manager.io/cluster-issuer: letsencrypt-production
+  hosts: []
+    # - host: horizon.example.com
+    #   paths:
+    #   - path: /
+    #     backend:
+    #       serviceName: horizon
+    #       servicePort: 8000
+  tls: []
+    # - secretName: horizon-tls
+    #   hosts:
+    #     - horizon.example.com
+
+persistence:
+  enabled: true
+  size:
+    testnet: 100Gi
+    mainnet: 400Gi  # Stellar requires less storage than Ethereum
+  accessMode: ReadWriteOnce
+  # storageClass: "-"
+
+resources:
+  limits:
+    # cpu: 1
+    memory: 8Gi  # Stellar has lower memory requirements
+  requests:
+    cpu: 1
+    memory: 4Gi
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}
+
+# necessary for lint
+global:
+  images:
+    alpine:
+      tag: foo
+      hash: bar

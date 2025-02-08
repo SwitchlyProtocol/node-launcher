@@ -1,0 +1,149 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "stellar-daemon.fullname" . }}
+  labels:
+    {{- include "stellar-daemon.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      {{- include "stellar-daemon.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        network-policy: external-egress-only
+        {{- include "stellar-daemon.selectorLabels" . | nindent 8 }}
+    spec:
+      automountServiceAccountToken: false
+      serviceAccountName: default
+    {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+    {{- end }}
+
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+
+      initContainers:
+        - name: init-stellar
+          image: alpine:{{ .Values.global.images.alpine.tag }}@sha256:{{ .Values.global.images.alpine.hash }}
+          imagePullPolicy: IfNotPresent
+          volumeMounts:
+            - name: data
+              mountPath: /data
+            - name: scripts
+              mountPath: /scripts
+          command:
+            - /scripts/init-stellar.sh
+
+      containers:
+        - name: stellar-core
+          securityContext:
+            {{- toYaml .Values.securityContext | nindent 12 }}
+          image: {{ .Values.image.stellar.core.name }}:{{ .Values.image.stellar.core.tag }}@sha256:{{ .Values.image.stellar.core.hash }}
+          imagePullPolicy: IfNotPresent
+          command: 
+            - /usr/bin/stellar-core
+            - --conf
+            - /etc/stellar/stellar-core.cfg
+          volumeMounts:
+            - name: data
+              mountPath: /data
+            - name: config
+              mountPath: /etc/stellar
+          ports:
+            - name: peer
+              containerPort: 11625
+              protocol: TCP
+            - name: http
+              containerPort: 11626
+              protocol: TCP
+          startupProbe:
+            httpGet:
+              path: /info
+              port: 11626
+            failureThreshold: 60
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /info
+              port: 11626
+            periodSeconds: 10
+          readinessProbe:
+            httpGet:
+              path: /info
+              port: 11626
+            periodSeconds: 10
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+
+        - name: horizon
+          image: {{ .Values.image.stellar.horizon.name }}:{{ .Values.image.stellar.horizon.tag }}@sha256:{{ .Values.image.stellar.horizon.hash }}
+          imagePullPolicy: IfNotPresent
+          command:
+            - horizon
+            - --stellar-core-url=http://localhost:11626
+            - --stellar-core-db-url=postgresql://{{ .Values.horizon.database.user }}:{{ .Values.horizon.database.password }}@{{ .Values.horizon.database.host }}/{{ .Values.horizon.database.dbname }}
+            - --network-passphrase={{ .Values.networkPassphrase }}
+            - --history-archive-urls={{ .Values.historyArchiveUrls }}
+            - --port=8000
+            - --ingest=true
+          ports:
+            - name: api
+              containerPort: 8000
+              protocol: TCP
+          volumeMounts:
+            - name: data
+              mountPath: /data
+          startupProbe:
+            httpGet:
+              path: /
+              port: 8000
+            failureThreshold: 60
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /
+              port: 8000
+            periodSeconds: 10
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 8000
+            periodSeconds: 10
+
+      volumes:
+        - name: data
+        {{- if and .Values.persistence.enabled (not .Values.persistence.hostPath) }}
+          persistentVolumeClaim:
+            claimName: {{ if .Values.persistence.existingClaim }}{{ .Values.persistence.existingClaim }}{{- else }}{{ template "stellar-daemon.fullname" . }}{{- end }}
+        {{- else if and .Values.persistence.enabled .Values.persistence.hostPath }}
+          hostPath:
+            path: {{ .Values.persistence.hostPath }}
+            type: DirectoryOrCreate
+        {{- else }}
+          emptyDir: {}
+        {{- end }}
+        - name: config
+          configMap:
+            name: {{ include "stellar-daemon.fullname" . }}-config
+        - name: scripts
+          configMap:
+            name: {{ include "stellar-daemon.fullname" . }}-scripts
+            defaultMode: 0777
+
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+    {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+    {{- end }}
+    {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+    {{- end }}

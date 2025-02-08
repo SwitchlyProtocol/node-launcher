@@ -1,0 +1,38 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "stellar-daemon.fullname" . }}-scripts
+data:
+  init-beacon.sh: |
+    #!/bin/sh
+
+    set -euo pipefail
+    # No special initialization needed for Stellar Core
+
+  probe.sh: |
+    #!/bin/sh
+
+    FILE=/root/.probe_last_height
+    # Get info from Stellar Core HTTP endpoint
+    INFO=$(curl -s http://localhost:11626/info) || exit 1
+    SYNCING=$(echo "$INFO" | jq -r '.state' | grep -q "Catching up") || true
+    HEIGHT=$(echo "$INFO" | jq -r '.ledger.num') || exit 1
+
+    # first time we are syncing from scratch
+    if [ "$HEIGHT" = "0" ]; then
+      exit 0
+    fi
+
+    if [ ! -f "$FILE" ]; then
+      echo "$HEIGHT" >$FILE
+      echo "Not getting new blocks"
+      exit 1
+    fi
+
+    OLD=$(cat $FILE)
+    echo "$HEIGHT" >$FILE
+    if [ "$OLD" = "$HEIGHT" ]; then
+      echo "Not getting new blocks"
+      exit 1
+    fi
+    exit 0
