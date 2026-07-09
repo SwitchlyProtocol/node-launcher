@@ -2,10 +2,10 @@
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
 
-thorApi: thornode:1317
+thorApi: switchlynode:1317
 thorDaemon:
-  mainnet: thornode:27147
-  stagenet: thornode:27147
+  mainnet: switchlynode:27147
+  stagenet: switchlynode:27147
 
 postgres:
   port: 5432
@@ -32,7 +32,7 @@ replicaCount: 1
 logLevel: info
 
 image:
-  name: registry.gitlab.com/thorchain/midgard
+  name: ghcr.io/switchlyprotocol/midgard
   tag: "" # When tag is empty it defaults to the chart appVersion.
   hash: c30b9e2eca6f06fcf9546d6d5273515c6983db8f953cb4c04738f1d444d25e0f
 

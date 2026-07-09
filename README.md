@@ -2,11 +2,18 @@ Helm Charts
 
 ========
 
-Charts to deploy THORNode stack and tools.
+Charts to deploy SwitchlyNode stack and tools.
 It is recommended to use the Makefile commands available in this repo
 to start the charts with predefined configuration for most environments.
 
-Once you have your THORNode up and running, please follow instructions [here](https://gitlab.com/thorchain/thornode) for the next steps.
+Once you have your SwitchlyNode up and running, please follow instructions [here](https://github.com/SwitchlyProtocol/switchlynode) for the next steps.
+
+> **Switchly fork.** This is Switchly's fork of THORChain's `node-launcher`. The SwitchlyNode and
+> Midgard images are pulled from GitHub Container Registry (`ghcr.io/switchlyprotocol/*`); the generic
+> external-chain daemon images are still reused from THORChain's public devops registry. Before
+> deploying, verify the network `chainID` in `switchlynode/values.yaml` matches the target network
+> (mainnet is `switchly-1`; the stagenet id is a placeholder pending the network launch). The
+> `ci/images/` tooling is not yet rebranded.
 
 ## Requirements
 
@@ -16,7 +23,7 @@ Once you have your THORNode up and running, please follow instructions [here](ht
 
 ## Running Kubernetes cluster
 
-To get a Kubernetes cluster running, you can use the Terraform scripts [here](https://gitlab.com/thorchain/devops/cluster-launcher).
+To get a Kubernetes cluster running, you can use the Terraform scripts [here](https://github.com/SwitchlyProtocol/cluster-launcher).
 
 ## Install Helm 3
 
@@ -52,21 +59,21 @@ make destroy-tools
 
 You can install those tools separately using the sections below.
 
-## Deploy THORNode
+## Deploy SwitchlyNode
 
-It is important to deploy the tools first before deploying the THORNode services as
-some services will have metrics configuration that would fail and stop the THORNode deployment.
+It is important to deploy the tools first before deploying the SwitchlyNode services as
+some services will have metrics configuration that would fail and stop the SwitchlyNode deployment.
 
-The commands deploy the umbrella chart `thornode-stack` in the background in the Kubernetes
-namespace `thornode`.
+The commands deploy the umbrella chart `switchlynode-stack` in the background in the Kubernetes
+namespace `switchlynode`.
 
 ```bash
 make install
 ```
 
-## THORNode commands
+## SwitchlyNode commands
 
-The Makefile provide different commands to help you operate your THORNode.
+The Makefile provide different commands to help you operate your SwitchlyNode.
 
 # help
 
@@ -87,7 +94,7 @@ make status
 
 # shell
 
-Opens a shell into your `thornode` deployment service selected:
+Opens a shell into your `switchlynode` deployment service selected:
 
 ```bash
 make shell
@@ -95,7 +102,7 @@ make shell
 
 # restart
 
-Restart a THORNode deployment service selected:
+Restart a SwitchlyNode deployment service selected:
 
 ```bash
 make restart
@@ -103,7 +110,7 @@ make restart
 
 # logs
 
-Display stream of logs of a THORNode deployment selected:
+Display stream of logs of a SwitchlyNode deployment selected:
 
 ```bash
 make logs
@@ -112,7 +119,7 @@ make logs
 # set-node-keys
 
 Send a `set-node-keys` to your node, which will set your node keys automatically for you
-by retrieving them directly from the `thornode` deployment.
+by retrieving them directly from the `switchlynode` deployment.
 
 ```bash
 make set-node-keys
@@ -138,7 +145,7 @@ make set-version
 
 # pause
 
-Send a `pause-chain` to your node, which will globally halt THORChain for 300 blocks. This is only to be used by node operators in the event of an emergency, such as a suspected attack on the network. This can only be done once by each node operator per churn. Nodes found abusing this command may be banned by other node operators. Use with extreme caution!
+Send a `pause-chain` to your node, which will globally halt Switchly for 300 blocks. This is only to be used by node operators in the event of an emergency, such as a suspected attack on the network. This can only be done once by each node operator per churn. Nodes found abusing this command may be banned by other node operators. Use with extreme caution!
 
 ```bash
 make pause
@@ -169,7 +176,7 @@ Please do not spam the Discord channels. Attempts to collude or otherwise abuse 
 make relay
 ```
 
-## Destroy THORNode
+## Destroy SwitchlyNode
 
 To fully destroy the running node and all services, run that command:
 
@@ -282,8 +289,8 @@ See previous section to access the Grafana admin interface through the command `
 Within the Grafana admin interface, to access the logs, find the `Explore` view from the left menu sidebar.
 Once in the `Explore` view, select Loki as the source, then select the service you want to show the logs by creating a query.
 The easiest way is to open the "Log browser" menu, then select the "job" label and then as value, select the service you want.
-For example you can select `thornode/bifrost` to show the logs of the Bifrost service within the default `thornode` namespace
-when deploying a mainnet validator THORNode.
+For example you can select `switchlynode/bifrost` to show the logs of the Bifrost service within the default `switchlynode` namespace
+when deploying a mainnet validator SwitchlyNode.
 
 ### Destroy Loki logs management stack
 
@@ -326,17 +333,17 @@ A guide for setting up Prometheus alerts can be found in [Alerting.md](./docs/Al
 
 ## Charts available:
 
-### THORNode full stack umbrella chart
+### SwitchlyNode full stack umbrella chart
 
-- thornode-stack: Umbrella chart packaging all services needed to run
-  a fullnode or validator THORNode.
+- switchlynode-stack: Umbrella chart packaging all services needed to run
+  a fullnode or validator SwitchlyNode.
 
-This should be the only chart used to run THORNode stack unless
+This should be the only chart used to run SwitchlyNode stack unless
 you know what you are doing and want to run each chart separately (not recommended).
 
-### THORNode services:
+### SwitchlyNode services:
 
-- thornode: THORNode daemon & API
+- switchlynode: SwitchlyNode daemon & API
 - gateway: Gateway proxy to get a single IP address for multiple deployments
 - bifrost: Bifrost service
 - midgard: Midgard API service

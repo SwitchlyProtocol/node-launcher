@@ -4,7 +4,7 @@ kind: ConfigMap
 metadata:
   name: {{ include "midgard.fullname" . }}-blockstore-config
 data:
-  thorchain-blockstore-hashes: |
+  switchly-blockstore-hashes: |
     882b18c16571d602b375fdf0f76e38d5fe1c5023a619e71da1c2dda18a80397c  000000010000
     fc8d867fbe59412d8e58724a8ff2efbe8ef9bbb55d4402147895f43052dfd232  000000012500
     ecf79221323b69b5aefc12b0f25e7336ebc27ae04e3d1efbadb902bf297e5728  000000020000

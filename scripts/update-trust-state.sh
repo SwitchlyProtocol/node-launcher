@@ -3,7 +3,7 @@
 set -euo pipefail
 
 update_blockstore_hashes() {
-  sed -i '/thorchain-blockstore-hashes/q' $1
+  sed -i '/switchly-blockstore-hashes/q' $1
   curl -s "$2" | sed -e 's/^/    /' >>$1
   echo "{{- end }}" >>$1
 }

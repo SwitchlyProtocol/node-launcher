@@ -3,19 +3,19 @@
 . ./scripts/gitlab.sh
 
 # get auth for container registry
-REGISTRY=thorchain/thornode
+REGISTRY=switchly/switchlynode
 TOKEN=$(gitlab_registry_token $REGISTRY)
 
 # check <values-file> <network>
 check() {
-  echo "Checking thornode $2..."
+  echo "Checking switchlynode $2..."
 
   VALUES_FILE="$1"
   EXPECTED_NETWORK="$2"
 
   TAG=$(yq -r '.global.tag' "$VALUES_FILE")
   HASH=$(yq -r '.global.hash' "$VALUES_FILE")
-  IMAGE="registry.gitlab.com/thorchain/thornode:${TAG}@sha256:${HASH}"
+  IMAGE="ghcr.io/switchlyprotocol/switchlynode:${TAG}@sha256:${HASH}"
   VERSION=$(yq -r '.global.tag|split("-")[-1]' "$VALUES_FILE")
 
   # verify the tag matches the digest
@@ -26,7 +26,7 @@ check() {
     exit 1
   fi
 
-  IMAGE_VERSION_LONG=$(docker run --rm "$IMAGE" thornode version --long)
+  IMAGE_VERSION_LONG=$(docker run --rm "$IMAGE" switchlynode version --long)
 
   IMAGE_VERSION=$(echo "$IMAGE_VERSION_LONG" | yq -r '.version')
   if [ "$IMAGE_VERSION" != "$VERSION" ]; then
@@ -53,7 +53,7 @@ check() {
     fi
   else
     # check that the version on the repo commit matches
-    REPO_VERSION=$(curl -s "https://gitlab.com/thorchain/thornode/-/raw/$IMAGE_COMMIT/version")
+    REPO_VERSION=$(curl -s "https://github.com/SwitchlyProtocol/switchlynode/-/raw/$IMAGE_COMMIT/version")
     if [ "$IMAGE_VERSION" != "$REPO_VERSION" ]; then
       echo "Error: $IMAGE"
       echo "Image Commit: $IMAGE_COMMIT"
@@ -68,5 +68,5 @@ check() {
   echo
 }
 
-check thornode-stack/mainnet.yaml mainnet
-check thornode-stack/stagenet.yaml stagenet
+check switchlynode-stack/mainnet.yaml mainnet
+check switchlynode-stack/stagenet.yaml stagenet

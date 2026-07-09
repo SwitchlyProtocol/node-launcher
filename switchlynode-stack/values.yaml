@@ -17,8 +17,8 @@ global:
 gateway:
   fullnameOverride: gateway
 
-thornode:
-  fullnameOverride: thornode
+switchlynode:
+  fullnameOverride: switchlynode
 
 bifrost:
   fullnameOverride: bifrost

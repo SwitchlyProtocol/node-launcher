@@ -1,6 +1,6 @@
 apiVersion: v2
-name: thornode-stack
-description: Deploys a THORNode stack with options to enable or disable some services
+name: switchlynode-stack
+description: Deploys a SwitchlyNode stack with options to enable or disable some services
 type: application
 version: 0.2.0
 
@@ -16,10 +16,10 @@ dependencies:
     version: 0.1.0
     condition: gateway.enabled
 
-  - name: thornode
-    repository: file://../thornode
+  - name: switchlynode
+    repository: file://../switchlynode
     version: 0.1.0
-    condition: thornode.enabled
+    condition: switchlynode.enabled
 
   - name: bifrost
     repository: file://../bifrost

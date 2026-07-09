@@ -5,7 +5,7 @@ The `make backup` and `make restore` commands are used to backup and restore to 
 1. Create backups of the original node.
 
 ```bash
-NAME=node1 TYPE=validator NET=mainnet SERVICE=thornode make backup
+NAME=node1 TYPE=validator NET=mainnet SERVICE=switchlynode make backup
 NAME=node1 TYPE=validator NET=mainnet SERVICE=bifrost make backup
 NAME=node1 TYPE=validator NET=mainnet make mnemonic > mnemonic.txt
 NAME=node1 TYPE=validator NET=mainnet make password > password.txt
@@ -27,6 +27,6 @@ NAME=node2 TYPE=validator NET=mainnet make install
 4. Restore the backups.
 
 ```bash
-NAME=node2 TYPE=validator NET=mainnet SERVICE=thornode make restore-backup
+NAME=node2 TYPE=validator NET=mainnet SERVICE=switchlynode make restore-backup
 NAME=node2 TYPE=validator NET=mainnet SERVICE=bifrost make restore-backup
 ```

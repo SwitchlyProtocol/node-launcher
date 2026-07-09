@@ -5,13 +5,13 @@ get_image_versions() {
   local CONF="$1"
   local NET="$1"
   (
-    pushd thornode-stack/
+    pushd switchlynode-stack/
     helm dependency build
     popd
   ) &>/dev/null
-  helm template --values thornode-stack/"$CONF".yaml \
+  helm template --values switchlynode-stack/"$CONF".yaml \
     --set "global.net=$NET" \
-    --set "midgard.enabled=true" thornode-stack/ |
+    --set "midgard.enabled=true" switchlynode-stack/ |
     grep -E '^\s*image:\s*[^\s]+'
 }
 
@@ -53,7 +53,7 @@ find . -type f -name 'Chart.yaml' -printf '%h\n' |
     popd
   done
 
-# Check thornode-stack with the various net configs.
+# Check switchlynode-stack with the various net configs.
 for NET in stagenet mainnet; do
-  helm lint --values thornode-stack/"$NET".yaml thornode-stack/
+  helm lint --values switchlynode-stack/"$NET".yaml switchlynode-stack/
 done

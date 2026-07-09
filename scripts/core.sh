@@ -54,7 +54,7 @@ get_node_net() {
 
 get_node_type() {
   [ "$TYPE" != "" ] && return
-  echo "=> Select THORNode type"
+  echo "=> Select SwitchlyNode type"
   menu validator genesis validator fullnode daemons
   TYPE=$MENU_SELECTED
   echo
@@ -64,20 +64,20 @@ get_node_name() {
   [ "$NAME" != "" ] && return
   case $NET in
     "mainnet")
-      NAME=thornode
+      NAME=switchlynode
       ;;
     "stagenet")
-      NAME=thornode-stagenet
+      NAME=switchlynode-stagenet
       ;;
   esac
-  read -r -p "=> Enter THORNode name [$NAME]: " name
+  read -r -p "=> Enter SwitchlyNode name [$NAME]: " name
   NAME=${name:-$NAME}
   echo
 }
 
 get_discord_channel() {
   [ "$DISCORD_CHANNEL" != "" ] && unset DISCORD_CHANNEL
-  echo "=> Select THORNode relay channel: "
+  echo "=> Select SwitchlyNode relay channel: "
   menu mainnet mainnet devops
   DISCORD_CHANNEL=$MENU_SELECTED
   echo
@@ -87,7 +87,7 @@ get_discord_message() {
   [ "$DISCORD_MESSAGE" != "" ] && unset DISCORD_MESSAGE
   if [[ -z ${EDITOR} ]]; then
     # If EDITOR is not set, use read command
-    read -r -p "=> Enter THORNode relay message: " discord_message
+    read -r -p "=> Enter SwitchlyNode relay message: " discord_message
   else
     # If EDITOR is set, use an editor
     TMPFILE=$(mktemp)
@@ -101,21 +101,21 @@ get_discord_message() {
 
 get_mimir_key() {
   [ "$MIMIR_KEY" != "" ] && unset MIMIR_KEY
-  read -r -p "=> Enter THORNode Mimir key: " mimir_key
+  read -r -p "=> Enter SwitchlyNode Mimir key: " mimir_key
   MIMIR_KEY=${mimir_key:-$MIMIR_KEY}
   echo
 }
 
 get_mimir_value() {
   [ "$MIMIR_VALUE" != "" ] && unset MIMIR_VALUE
-  read -r -p "=> Enter THORNode Mimir value: " mimir_value
+  read -r -p "=> Enter SwitchlyNode Mimir value: " mimir_value
   MIMIR_VALUE=${mimir_value:-$MIMIR_VALUE}
   echo
 }
 
 get_node_address() {
   [ "$NODE_ADDRESS" != "" ] && unset NODE_ADDRESS
-  read -r -p "=> Enter THORNode address to ban: " node_address
+  read -r -p "=> Enter SwitchlyNode address to ban: " node_address
   NODE_ADDRESS=${node_address:-$NODE_ADDRESS}
   echo
 }
@@ -141,22 +141,22 @@ get_node_info_short() {
 
 get_node_service() {
   [ "$SERVICE" != "" ] && return
-  echo "=> Select THORNode service"
-  menu thornode thornode bifrost midgard gateway binance-smart-daemon dogecoin-daemon gaia-daemon avalanche-daemon ethereum-daemon bitcoin-daemon litecoin-daemon bitcoin-cash-daemon midgard-timescaledb
+  echo "=> Select SwitchlyNode service"
+  menu switchlynode switchlynode bifrost midgard gateway binance-smart-daemon dogecoin-daemon gaia-daemon avalanche-daemon ethereum-daemon bitcoin-daemon litecoin-daemon bitcoin-cash-daemon midgard-timescaledb
   SERVICE=$MENU_SELECTED
   echo
 }
 
 create_namespace() {
   if ! kubectl get ns "$NAME" >/dev/null 2>&1; then
-    echo "=> Creating THORNode Namespace"
+    echo "=> Creating SwitchlyNode Namespace"
     kubectl create ns "$NAME"
     echo
   fi
 }
 
 node_exists() {
-  kubectl get -n "$NAME" deploy/thornode >/dev/null 2>&1
+  kubectl get -n "$NAME" deploy/switchlynode >/dev/null 2>&1
 }
 
 snapshot_available() {
@@ -186,7 +186,7 @@ make_snapshot() {
   fi
 
   echo
-  echo "=> Snapshotting service $boldgreen$service$reset of a THORNode named $boldgreen$NAME$reset"
+  echo "=> Snapshotting service $boldgreen$service$reset of a SwitchlyNode named $boldgreen$NAME$reset"
   if [ -z "$TC_NO_CONFIRM" ]; then
     echo -n "$boldyellow:: Are you sure? Confirm [y/n]: $reset" && read -r ans && [ "${ans:-N}" != y ] && return
   fi
@@ -235,7 +235,7 @@ make_backup() {
             "name": "$service",
             "image": "busybox:1.33",
             "volumeMounts": [
-              {"mountPath": "/root/.thornode", "name": "data", "subPath": "thornode"},
+              {"mountPath": "/root/.switchlynode", "name": "data", "subPath": "switchlynode"},
               {"mountPath": "/var/data/bifrost", "name": "data", "subPath": "data"}
             ]
           }
@@ -272,7 +272,7 @@ EOF
   fi
 
   echo
-  echo "=> Backing up service $boldgreen$service$reset from THORNode in $boldgreen$NAME$reset"
+  echo "=> Backing up service $boldgreen$service$reset from SwitchlyNode in $boldgreen$NAME$reset"
   confirm
 
   local pod
@@ -289,11 +289,11 @@ EOF
   day=$(date +%Y-%m-%d)
   mkdir -p "backups/$NAME/$service/$day"
   if [ "$service" = "bifrost" ]; then
-    kubectl exec -it -n "$NAME" "$pod" -c "$service" -- sh -c "cd /root/.thornode && tar cfz \"$service-$seconds.tar.gz\" localstate-*.json"
+    kubectl exec -it -n "$NAME" "$pod" -c "$service" -- sh -c "cd /root/.switchlynode && tar cfz \"$service-$seconds.tar.gz\" localstate-*.json"
   else
-    kubectl exec -it -n "$NAME" "$pod" -c "$service" -- sh -c "cd /root/.thornode && tar cfz \"$service-$seconds.tar.gz\" config/"
+    kubectl exec -it -n "$NAME" "$pod" -c "$service" -- sh -c "cd /root/.switchlynode && tar cfz \"$service-$seconds.tar.gz\" config/"
   fi
-  kubectl exec -n "$NAME" "$pod" -c "$service" -- sh -c "cd /root/.thornode && tar cfz - \"$service-$seconds.tar.gz\"" | tar xfz - -C "$PWD/backups/$NAME/$service/$day"
+  kubectl exec -n "$NAME" "$pod" -c "$service" -- sh -c "cd /root/.switchlynode && tar cfz - \"$service-$seconds.tar.gz\"" | tar xfz - -C "$PWD/backups/$NAME/$service/$day"
 
   if (kubectl get pod -n "$NAME" -l "app.kubernetes.io/name=$service" 2>&1 | grep "No resources found") >/dev/null 2>&1; then
     kubectl delete pod --now=true -n "$NAME" "backup-$service"
@@ -302,23 +302,23 @@ EOF
   echo "Backup available in path ./backups/$NAME/$service/$day"
 }
 
-get_thornode_image() {
-  [ -z "$EXTRA_ARGS" ] && die "Cannot determine thornode image"
+get_switchlynode_image() {
+  [ -z "$EXTRA_ARGS" ] && die "Cannot determine switchlynode image"
   # shellcheck disable=SC2086
   (
     set -eo pipefail
-    helm template ./thornode-stack $EXTRA_ARGS | yq -r 'select((.kind == "Deployment") and (.metadata.name == "thornode")).spec.template.spec.containers[0].image'
+    helm template ./switchlynode-stack $EXTRA_ARGS | yq -r 'select((.kind == "Deployment") and (.metadata.name == "switchlynode")).spec.template.spec.containers[0].image'
   )
 }
 
 generate_mnemonic() {
-  image=$(get_thornode_image)
-  echo "=> Generating THORNode Mnemonic phrase using image $image"
+  image=$(get_switchlynode_image)
+  echo "=> Generating SwitchlyNode Mnemonic phrase using image $image"
   kubectl -n "$NAME" run mnemonic --image="$image" --restart=Never --command -- /bin/sh -c 'tail -F /dev/null'
   kubectl wait --for=condition=ready pods mnemonic -n "$NAME" --timeout=5m >/dev/null 2>&1
-  mnemonic=$(kubectl exec -n "$NAME" mnemonic -- thornode keys add generate --dry-run --output json | jq -r '.mnemonic')
+  mnemonic=$(kubectl exec -n "$NAME" mnemonic -- switchlynode keys add generate --dry-run --output json | jq -r '.mnemonic')
   [[ $mnemonic == "" ]] || [[ $mnemonic == "null" ]] && die "Mnemonic generation failed. Please try again."
-  kubectl -n "$NAME" create secret generic thornode-mnemonic --from-literal=mnemonic="$mnemonic"
+  kubectl -n "$NAME" create secret generic switchlynode-mnemonic --from-literal=mnemonic="$mnemonic"
   kubectl -n "$NAME" delete pod --now=true mnemonic
   echo
 }
@@ -327,9 +327,9 @@ create_mnemonic() {
   local mnemonic
   local image
   # Do nothing if mnemonic already exists.
-  kubectl -n "${NAME}" get secrets/thornode-mnemonic >/dev/null 2>&1 && return
+  kubectl -n "${NAME}" get secrets/switchlynode-mnemonic >/dev/null 2>&1 && return
 
-  echo "=> Setting THORNode Mnemonic phrase"
+  echo "=> Setting SwitchlyNode Mnemonic phrase"
   read -r -s -p "Enter mnemonic (empty to generate): " mnemonic
   echo
 
@@ -344,26 +344,26 @@ create_mnemonic() {
   echo
   [[ ${mnemonic} != "${mnemonicconf}" ]] && die "Mnemonics mismatch"
 
-  kubectl -n "${NAME}" create secret generic thornode-mnemonic --from-literal=mnemonic="${mnemonic}"
+  kubectl -n "${NAME}" create secret generic switchlynode-mnemonic --from-literal=mnemonic="${mnemonic}"
 }
 
 create_password() {
   local pwd
   local pwdconf
-  if ! kubectl get -n "$NAME" secrets/thornode-password >/dev/null 2>&1; then
-    echo "=> Creating THORNode Password"
+  if ! kubectl get -n "$NAME" secrets/switchlynode-password >/dev/null 2>&1; then
+    echo "=> Creating SwitchlyNode Password"
     read -r -s -p "Enter password: " pwd
     echo
     read -r -s -p "Confirm password: " pwdconf
     echo
     [ "$pwd" != "$pwdconf" ] && die "Passwords mismatch"
-    kubectl -n "$NAME" create secret generic thornode-password --from-literal=password="$pwd"
+    kubectl -n "$NAME" create secret generic switchlynode-password --from-literal=password="$pwd"
     echo
   fi
 }
 
 display_mnemonic() {
-  kubectl get -n "$NAME" secrets/thornode-mnemonic --template="{{.data.mnemonic}}" | base64 --decode
+  kubectl get -n "$NAME" secrets/switchlynode-mnemonic --template="{{.data.mnemonic}}" | base64 --decode
   echo
 }
 
@@ -372,11 +372,11 @@ display_pods() {
 }
 
 display_password() {
-  kubectl get -n "$NAME" secrets/thornode-password --template="{{.data.password}}" | base64 --decode
+  kubectl get -n "$NAME" secrets/switchlynode-password --template="{{.data.password}}" | base64 --decode
 }
 
 display_status() {
-  APP=thornode
+  APP=switchlynode
   if [ "$TYPE" = "validator" ]; then
     APP=bifrost
   fi
@@ -389,7 +389,7 @@ display_status() {
     NODE_ADDRESS=$(awk '$1 ~ /ADDRESS/ {match($2, /[a-z0-9]+/); print substr($2, RSTART, RLENGTH)}' <<<"$output")
 
     if grep -E "^STATUS\s+Active" <<<"$output" >/dev/null; then
-      echo -e "\n=> Detected ${red}active$reset validator THORNode on $boldgreen$NET$reset named $boldgreen$NAME$reset"
+      echo -e "\n=> Detected ${red}active$reset validator SwitchlyNode on $boldgreen$NET$reset named $boldgreen$NAME$reset"
 
       # prompt for missing mimir votes if mainnet
       if [ "$NET" = "mainnet" ]; then
@@ -397,8 +397,8 @@ display_status() {
 
         # all reminder votes the node is missing
         local missing_votes
-        missing_votes=$(kubectl exec -it -n "$NAME" deploy/thornode -c thornode -- curl -s http://localhost:1317/thorchain/mimir/nodes_all |
-          jq -r "$(curl -s https://api.ninerealms.com/thorchain/votes | jq -c) - [.mimirs[] | select(.signer==\"$NODE_ADDRESS\") | .key] | .[]")
+        missing_votes=$(kubectl exec -it -n "$NAME" deploy/switchlynode -c switchlynode -- curl -s http://localhost:1317/switchly/mimir/nodes_all |
+          jq -r "$(curl -s https://api.ninerealms.com/switchly/votes | jq -c) - [.mimirs[] | select(.signer==\"$NODE_ADDRESS\") | .key] | .[]")
 
         if [ -n "$missing_votes" ]; then
           echo
@@ -409,82 +409,82 @@ display_status() {
     fi
 
   else
-    echo "THORNode pod is not currently running, status is unavailable"
+    echo "SwitchlyNode pod is not currently running, status is unavailable"
   fi
   return
 }
 
 deploy_genesis() {
   local args
-  [ "$NET" = "mainnet" ] && args="--set global.passwordSecret=thornode-password"
-  [ "$NET" = "stagenet" ] && args="--set global.passwordSecret=thornode-password"
-  helm diff upgrade -C 3 --install "$NAME" ./thornode-stack -n "$NAME" \
+  [ "$NET" = "mainnet" ] && args="--set global.passwordSecret=switchlynode-password"
+  [ "$NET" = "stagenet" ] && args="--set global.passwordSecret=switchlynode-password"
+  helm diff upgrade -C 3 --install "$NAME" ./switchlynode-stack -n "$NAME" \
     $args $EXTRA_ARGS \
-    --set global.mnemonicSecret=thornode-mnemonic \
+    --set global.mnemonicSecret=switchlynode-mnemonic \
     --set global.net="$NET" \
-    --set thornode.type="genesis"
-  echo -e "=> Changes for a $boldgreen$TYPE$reset THORNode on $boldgreen$NET$reset named $boldgreen$NAME$reset"
+    --set switchlynode.type="genesis"
+  echo -e "=> Changes for a $boldgreen$TYPE$reset SwitchlyNode on $boldgreen$NET$reset named $boldgreen$NAME$reset"
   confirm
-  helm upgrade --install "$NAME" ./thornode-stack -n "$NAME" \
+  helm upgrade --install "$NAME" ./switchlynode-stack -n "$NAME" \
     --create-namespace $args $EXTRA_ARGS \
-    --set global.mnemonicSecret=thornode-mnemonic \
+    --set global.mnemonicSecret=switchlynode-mnemonic \
     --set global.net="$NET" \
-    --set thornode.type="genesis"
+    --set switchlynode.type="genesis"
 
-  echo -e "=> Restarting gateway for a $boldgreen$TYPE$reset THORNode on $boldgreen$NET$reset named $boldgreen$NAME$reset"
+  echo -e "=> Restarting gateway for a $boldgreen$TYPE$reset SwitchlyNode on $boldgreen$NET$reset named $boldgreen$NAME$reset"
   confirm
   kubectl -n "$NAME" rollout restart deploy gateway
 }
 
 deploy_validator() {
   local args
-  [ "$NET" = "mainnet" ] && args="--set global.passwordSecret=thornode-password"
-  [ "$NET" = "stagenet" ] && args="--set global.passwordSecret=thornode-password"
-  helm diff upgrade -C 3 --install "$NAME" ./thornode-stack -n "$NAME" \
+  [ "$NET" = "mainnet" ] && args="--set global.passwordSecret=switchlynode-password"
+  [ "$NET" = "stagenet" ] && args="--set global.passwordSecret=switchlynode-password"
+  helm diff upgrade -C 3 --install "$NAME" ./switchlynode-stack -n "$NAME" \
     $args $EXTRA_ARGS \
-    --set global.mnemonicSecret=thornode-mnemonic \
+    --set global.mnemonicSecret=switchlynode-mnemonic \
     --set global.net="$NET" \
-    --set thornode.type="validator"
-  echo -e "=> Changes for a $boldgreen$TYPE$reset THORNode on $boldgreen$NET$reset named $boldgreen$NAME$reset"
+    --set switchlynode.type="validator"
+  echo -e "=> Changes for a $boldgreen$TYPE$reset SwitchlyNode on $boldgreen$NET$reset named $boldgreen$NAME$reset"
   confirm
-  helm upgrade --install "$NAME" ./thornode-stack -n "$NAME" \
+  helm upgrade --install "$NAME" ./switchlynode-stack -n "$NAME" \
     --create-namespace $args $EXTRA_ARGS \
-    --set global.mnemonicSecret=thornode-mnemonic \
+    --set global.mnemonicSecret=switchlynode-mnemonic \
     --set global.net="$NET" \
-    --set thornode.type="validator"
+    --set switchlynode.type="validator"
 
   [ "$TYPE" = "daemons" ] && return
 
-  echo -e "=> Restarting gateway for a $boldgreen$TYPE$reset THORNode on $boldgreen$NET$reset named $boldgreen$NAME$reset"
+  echo -e "=> Restarting gateway for a $boldgreen$TYPE$reset SwitchlyNode on $boldgreen$NET$reset named $boldgreen$NAME$reset"
   confirm
   kubectl -n "$NAME" rollout restart deploy gateway
 }
 
 deploy_fullnode() {
-  helm diff upgrade -C 3 --install "$NAME" ./thornode-stack -n "$NAME" \
+  helm diff upgrade -C 3 --install "$NAME" ./switchlynode-stack -n "$NAME" \
     $args $EXTRA_ARGS \
-    --set global.mnemonicSecret=thornode-mnemonic \
+    --set global.mnemonicSecret=switchlynode-mnemonic \
     --set global.net="$NET" \
     --set midgard.enabled=true,bifrost.enabled=false \
     --set bitcoin-daemon.enabled=false,bitcoin-cash-daemon.enabled=false \
     --set litecoin-daemon.enabled=false,ethereum-daemon.enabled=false \
     --set dogecoin-daemon.enabled=false,gaia-daemon.enabled=false \
     --set avalanche-daemon.enabled=false,binance-smart-daemon.enabled=false \
-    --set thornode.type="fullnode",gateway.validator=false,gateway.midgard=true,gateway.rpc.limited=false,gateway.api=true
-  echo -e "=> Changes for a $boldgreen$TYPE$reset THORNode on $boldgreen$NET$reset named $boldgreen$NAME$reset"
+    --set switchlynode.type="fullnode",gateway.validator=false,gateway.midgard=true,gateway.rpc.limited=false,gateway.api=true
+  echo -e "=> Changes for a $boldgreen$TYPE$reset SwitchlyNode on $boldgreen$NET$reset named $boldgreen$NAME$reset"
   confirm
-  helm upgrade --install "$NAME" ./thornode-stack -n "$NAME" \
+  helm upgrade --install "$NAME" ./switchlynode-stack -n "$NAME" \
     --create-namespace $EXTRA_ARGS \
-    --set global.mnemonicSecret=thornode-mnemonic \
+    --set global.mnemonicSecret=switchlynode-mnemonic \
     --set global.net="$NET" \
     --set midgard.enabled=true,bifrost.enabled=false \
     --set bitcoin-daemon.enabled=false,bitcoin-cash-daemon.enabled=false \
     --set litecoin-daemon.enabled=false,ethereum-daemon.enabled=false \
     --set dogecoin-daemon.enabled=false,gaia-daemon.enabled=false \
     --set avalanche-daemon.enabled=false,binance-smart-daemon.enabled=false \
-    --set thornode.type="fullnode",gateway.validator=false,gateway.midgard=true,gateway.rpc.limited=false,gateway.api=true
+    --set switchlynode.type="fullnode",gateway.validator=false,gateway.midgard=true,gateway.rpc.limited=false,gateway.api=true
 
-  echo -e "=> Restarting gateway for a $boldgreen$TYPE$reset THORNode on $boldgreen$NET$reset named $boldgreen$NAME$reset"
+  echo -e "=> Restarting gateway for a $boldgreen$TYPE$reset SwitchlyNode on $boldgreen$NET$reset named $boldgreen$NAME$reset"
   confirm
   kubectl -n "$NAME" rollout restart deploy gateway
 }

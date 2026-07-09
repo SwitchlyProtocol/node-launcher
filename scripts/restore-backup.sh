@@ -4,11 +4,11 @@ source ./scripts/core.sh
 
 get_node_info_short
 
-node_exists || die "No existing THORNode found, make sure this is the correct name"
+node_exists || die "No existing SwitchlyNode found, make sure this is the correct name"
 
 if [ "$SERVICE" = "" ]; then
-  echo "=> Select a THORNode service to restore a backup from"
-  menu thornode thornode bifrost
+  echo "=> Select a SwitchlyNode service to restore a backup from"
+  menu switchlynode switchlynode bifrost
   SERVICE=$MENU_SELECTED
 fi
 
@@ -48,7 +48,7 @@ if [ "$SERVICE" = "bifrost" ]; then
           "name": "$SERVICE",
           "image": "busybox:1.33",
           "volumeMounts": [
-            {"mountPath": "/root/.thornode", "name": "data", "subPath": "thornode"},
+            {"mountPath": "/root/.switchlynode", "name": "data", "subPath": "switchlynode"},
             {"mountPath": "/var/data/bifrost", "name": "data", "subPath": "data"}
           ]
         }
@@ -84,7 +84,7 @@ EOF
 fi
 
 echo
-echo "=> Restoring backup service $boldgreen$SERVICE$reset from THORNode in $boldgreen$NAME$reset using backup $boldgreen$FILE$reset"
+echo "=> Restoring backup service $boldgreen$SERVICE$reset from SwitchlyNode in $boldgreen$NAME$reset using backup $boldgreen$FILE$reset"
 confirm
 
 POD="deploy/$SERVICE"
@@ -96,9 +96,9 @@ fi
 
 FILE_BASE=$(basename "$FILE")
 FILE_DIR=$(dirname "$FILE")
-tar -C "$FILE_DIR" -cf - "$FILE_BASE" | kubectl exec -i -n "$NAME" "$POD" -c "$SERVICE" -- tar xf - -C /root/.thornode
+tar -C "$FILE_DIR" -cf - "$FILE_BASE" | kubectl exec -i -n "$NAME" "$POD" -c "$SERVICE" -- tar xf - -C /root/.switchlynode
 
-kubectl exec -it -n "$NAME" "$POD" -c "$SERVICE" -- sh -c "cd /root/.thornode && tar xf \"$FILE_BASE\""
+kubectl exec -it -n "$NAME" "$POD" -c "$SERVICE" -- sh -c "cd /root/.switchlynode && tar xf \"$FILE_BASE\""
 
 if (kubectl get pod -n "$NAME" -l "app.kubernetes.io/name=$SERVICE" 2>&1 | grep "No resources found") >/dev/null 2>&1; then
   kubectl delete pod --now=true -n "$NAME" "backup-$SERVICE"

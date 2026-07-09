@@ -1,26 +1,26 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ include "thornode.fullname" . }}
+  name: {{ include "switchlynode.fullname" . }}
   labels:
-    {{- include "thornode.labels" . | nindent 4 }}
+    {{- include "switchlynode.labels" . | nindent 4 }}
 spec:
   replicas: {{ .Values.replicaCount }}
   strategy:
     type: {{ .Values.strategyType }}
   selector:
     matchLabels:
-      {{- include "thornode.selectorLabels" . | nindent 6 }}
+      {{- include "switchlynode.selectorLabels" . | nindent 6 }}
   template:
     metadata:
       labels:
-        {{- include "thornode.selectorLabels" . | nindent 8 }}
+        {{- include "switchlynode.selectorLabels" . | nindent 8 }}
     spec:
     {{- with .Values.imagePullSecrets }}
       imagePullSecrets:
         {{- toYaml . | nindent 8 }}
     {{- end }}
-      serviceAccountName: {{ include "thornode.serviceAccountName" . }}
+      serviceAccountName: {{ include "switchlynode.serviceAccountName" . }}
       securityContext:
         {{- toYaml .Values.podSecurityContext | nindent 8 }}
 
@@ -33,9 +33,9 @@ spec:
         image: alpine/k8s:{{ .Values.global.images.alpineK8s.tag }}@sha256:{{ .Values.global.images.alpineK8s.hash }}
         imagePullPolicy: IfNotPresent
         {{- if .Values.global.gateway.enabled }}
-        command: ['/scripts/external-ip.sh', 'false', '{{ .Values.global.gateway.name }}', '{{ include "thornode.fullname" . }}-external-ip']
+        command: ['/scripts/external-ip.sh', 'false', '{{ .Values.global.gateway.name }}', '{{ include "switchlynode.fullname" . }}-external-ip']
         {{- else }}
-        command: ['/scripts/external-ip.sh', 'false', '{{ include "thornode.fullname" . }}', '{{ include "thornode.fullname" . }}-external-ip']
+        command: ['/scripts/external-ip.sh', 'false', '{{ include "switchlynode.fullname" . }}', '{{ include "switchlynode.fullname" . }}-external-ip']
         {{- end }}
         volumeMounts:
         - name: scripts
@@ -43,9 +43,9 @@ spec:
 
       {{- if .Values.haltHeight }}
       - name: halt-height
-        image: {{ include "thornode.image" . }}
+        image: {{ include "switchlynode.image" . }}
         imagePullPolicy: {{ .Values.image.pullPolicy }}
-        command: ['sh', '-c', '[ ! -e /root/.thornode/data/priv_validator_state.json ] || [ $(cat /root/.thornode/data/priv_validator_state.json | jq -r .height) -lt {{ .Values.haltHeight }} ] || sleep infinity']
+        command: ['sh', '-c', '[ ! -e /root/.switchlynode/data/priv_validator_state.json ] || [ $(cat /root/.switchlynode/data/priv_validator_state.json | jq -r .height) -lt {{ .Values.haltHeight }} ] || sleep infinity']
         volumeMounts:
           - name: data
             mountPath: /root/
@@ -55,20 +55,20 @@ spec:
       - name: init-peer
         image: busybox:{{ .Values.global.images.busybox.tag }}@sha256:{{ .Values.global.images.busybox.hash }}
         imagePullPolicy: IfNotPresent
-        command: ['sh', '-c', 'until nc -zv {{ default .Values.peer .Values.global.peer }}:{{ include "thornode.rpc" . }}; do echo waiting for peer thornode; sleep 2; done']
+        command: ['sh', '-c', 'until nc -zv {{ default .Values.peer .Values.global.peer }}:{{ include "switchlynode.rpc" . }}; do echo waiting for peer switchlynode; sleep 2; done']
       {{- end }}
 
       {{- if .Values.peerApi }}
       - name: init-peer-api
         image: busybox:{{ .Values.global.images.busybox.tag }}@sha256:{{ .Values.global.images.busybox.hash }}
         imagePullPolicy: IfNotPresent
-        command: ['sh', '-c', "until nc -zv {{ .Values.peerApi }}:1317; do echo waiting for peer thornode; sleep 2; done"]
+        command: ['sh', '-c', "until nc -zv {{ .Values.peerApi }}:1317; do echo waiting for peer switchlynode; sleep 2; done"]
       {{- end }}
       containers:
         - name: {{ .Chart.Name }}
           securityContext:
             {{- toYaml .Values.securityContext | nindent 12 }}
-          image: {{ include "thornode.image" . }}
+          image: {{ include "switchlynode.image" . }}
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           command:
             -  /scripts/{{ .Values.type }}.sh
@@ -81,7 +81,7 @@ spec:
             - name: EXTERNAL_IP
               valueFrom:
                 configMapKeyRef:
-                  name: {{ include "thornode.fullname" . }}-external-ip
+                  name: {{ include "switchlynode.fullname" . }}-external-ip
                   key: externalIP
             - name: VALIDATOR
               {{- if eq .Values.type "fullnode" }}
@@ -98,7 +98,7 @@ spec:
             - name: HARDFORK_BLOCK_HEIGHT
               value: "{{ .Values.haltHeight }}"
             - name: NET
-              value: {{ include "thornode.net" . }}
+              value: {{ include "switchlynode.net" . }}
             - name: SIGNER_NAME
               value: {{ .Values.signer.name }}
             - name: SIGNER_PASSWD
@@ -111,12 +111,12 @@ spec:
               value: {{ .Values.signer.password }}
               {{- end }}
             - name: CHAIN_ID
-              value: {{ include "thornode.chainID" . }}
-            - name: THOR_AUTO_STATE_SYNC_ENABLED
+              value: {{ include "switchlynode.chainID" . }}
+            - name: SWITCHLY_AUTO_STATE_SYNC_ENABLED
               value: "{{ .Values.statesync.auto }}"
-            - name: THOR_COSMOS_STATE_SYNC_SNAPSHOT_INTERVAL
+            - name: SWITCHLY_COSMOS_STATE_SYNC_SNAPSHOT_INTERVAL
               value: "{{ .Values.statesync.snapshotInterval }}"
-            - name: THOR_TENDERMINT_LOG_FORMAT
+            - name: SWITCHLY_TENDERMINT_LOG_FORMAT
               value: "json"
             - name: SIGNER_SEED_PHRASE
               valueFrom:
@@ -132,13 +132,13 @@ spec:
               containerPort: {{ .Values.service.port.api }}
               protocol: TCP
             - name: p2p
-              containerPort: {{ include "thornode.p2p" . }}
+              containerPort: {{ include "switchlynode.p2p" . }}
               protocol: TCP
             - name: rpc
-              containerPort: {{ include "thornode.rpc" . }}
+              containerPort: {{ include "switchlynode.rpc" . }}
               protocol: TCP
             - name: grpc
-              containerPort: {{ include "thornode.grpc" . }}
+              containerPort: {{ include "switchlynode.grpc" . }}
               protocol: TCP
             - name: prometheus
               containerPort: 26660
@@ -165,7 +165,7 @@ spec:
       - name: data
       {{- if and .Values.persistence.enabled (not .Values.persistence.hostPath) }}
         persistentVolumeClaim:
-          claimName: {{ if .Values.persistence.existingClaim }}{{ .Values.persistence.existingClaim }}{{- else }}{{ template "thornode.fullname" . }}{{- end }}
+          claimName: {{ if .Values.persistence.existingClaim }}{{ .Values.persistence.existingClaim }}{{- else }}{{ template "switchlynode.fullname" . }}{{- end }}
       {{- else if and .Values.persistence.enabled .Values.persistence.hostPath }}
         hostPath:
           path: {{ .Values.persistence.hostPath }}
@@ -175,11 +175,11 @@ spec:
       {{- end }}
       - name: scripts
         configMap:
-          name: {{ include "thornode.fullname" . }}-scripts
+          name: {{ include "switchlynode.fullname" . }}-scripts
           defaultMode: 0777
       - name: configs
         configMap:
-          name: {{ include "thornode.fullname" . }}-configs
+          name: {{ include "switchlynode.fullname" . }}-configs
           defaultMode: 0666
       {{- with .Values.nodeSelector }}
       nodeSelector:

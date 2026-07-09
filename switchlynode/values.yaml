@@ -1,4 +1,4 @@
-# Default values for thornode.
+# Default values for switchlynode.
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
 
@@ -7,10 +7,10 @@ type: validator
 
 autoupdate:
   enabled: false
-  nodes: https://thornode.ninerealms.com/thorchain/nodes
+  nodes: https://switchlynode.ninerealms.com/switchly/nodes
 
 signer:
-  name: thorchain
+  name: switchly
   password: password
   mnemonicSecret: ""
   passwordSecret: ""
@@ -18,19 +18,19 @@ signer:
 peer:
 peerApi:
 
-# See docs/Thornode-Snapshot-Recovery-and-Storage-Management.md for details.
+# See docs/Switchlynode-Snapshot-Recovery-and-Storage-Management.md for details.
 statesync:
   auto: false
   snapshotInterval: 0
 
 # provide custom environment variables to override config defaults:
-# https://gitlab.com/thorchain/thornode/-/blob/develop/config/default.yaml
+# https://github.com/SwitchlyProtocol/switchlynode/-/blob/develop/config/default.yaml
 env: {}
 
 debug: false
 chainID:
-  mainnet: thorchain-1
-  stagenet: thorchain-stagenet-2
+  mainnet: switchly-1
+  stagenet: switchly-stagenet-2
 
 haltHeight:
 
@@ -39,7 +39,7 @@ replicaCount: 1
 strategyType: Recreate
 
 image:
-  repository: registry.gitlab.com/thorchain/thornode
+  repository: ghcr.io/switchlyprotocol/switchlynode
   pullPolicy: IfNotPresent
   tag: mainnet
   hash: placeholder

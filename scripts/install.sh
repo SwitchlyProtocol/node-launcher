@@ -5,13 +5,13 @@ source ./scripts/core.sh
 get_node_net
 
 if [ -n "$HARDFORK_BLOCK_HEIGHT" ]; then
-  EXTRA_ARGS="$EXTRA_ARGS --set thornode.haltHeight=$HARDFORK_BLOCK_HEIGHT"
+  EXTRA_ARGS="$EXTRA_ARGS --set switchlynode.haltHeight=$HARDFORK_BLOCK_HEIGHT"
 fi
 
 source ./scripts/pre-install.sh
 
 if [ "$0" == "./scripts/update.sh" ] && snapshot_available; then
-  make_snapshot "thornode"
+  make_snapshot "switchlynode"
   if [ "$TYPE" != "fullnode" ]; then
     make_snapshot "bifrost"
   fi
@@ -34,7 +34,7 @@ case $TYPE in
     deploy_fullnode
     ;;
   daemons)
-    EXTRA_ARGS="$EXTRA_ARGS --set thornode.enabled=false"
+    EXTRA_ARGS="$EXTRA_ARGS --set switchlynode.enabled=false"
     EXTRA_ARGS="$EXTRA_ARGS --set bifrost.enabled=false"
     EXTRA_ARGS="$EXTRA_ARGS --set gateway.enabled=false"
     deploy_validator

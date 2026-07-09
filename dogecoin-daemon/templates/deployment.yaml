@@ -43,7 +43,7 @@ spec:
             - -rpcworkqueue=64
             - -rpcallowip=10.0.0.0/8
             - -rpcbind=0.0.0.0
-            - -rpcauth=thorchain:d7e53bb9757b6d4fabf87775c7824b5c$7097e9cde30ef4319ed708fc559267679ae6cc0bf7e18fd49b283650c0c26a10
+            - -rpcauth=switchly:d7e53bb9757b6d4fabf87775c7824b5c$7097e9cde30ef4319ed708fc559267679ae6cc0bf7e18fd49b283650c0c26a10
             - -minrelaytxfee=0.3
             - -harddustlimit=0.002
             - -mempoolreplacement=0

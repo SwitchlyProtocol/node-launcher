@@ -8,8 +8,8 @@ stages:
 
 variables:
   SCAN_KUBERNETES_MANIFESTS: "true"
-  KUBESEC_HELM_CHARTS_PATH: ./thornode-stack
-  KUBESEC_HELM_OPTIONS: --dependency-update --values thornode-stack/values.yaml --values thornode-stack/mainnet.yaml
+  KUBESEC_HELM_CHARTS_PATH: ./switchlynode-stack
+  KUBESEC_HELM_OPTIONS: --dependency-update --values switchlynode-stack/values.yaml --values switchlynode-stack/mainnet.yaml
 
 ########################################################################################
 # Gitlab Jobs
@@ -55,7 +55,7 @@ check-image-digests:
     - apk add py3-pip jq curl bash
     - pip3 install yq
   script:
-    - ./scripts/check-thornode-images.sh
+    - ./scripts/check-switchlynode-images.sh
     - ./scripts/check-node-launcher-images.sh
     - ./scripts/check-midgard-images.sh
 

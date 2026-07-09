@@ -175,7 +175,7 @@ grafana:
     enabled: true
     size: 10Gi
 
-  adminPassword: thorchain
+  adminPassword: switchly
 
   datasources:
     datasources.yaml:
@@ -199,7 +199,7 @@ grafana:
             path: /var/lib/grafana/dashboards/default
   dashboards:
     default:
-      thorchain:
+      switchly:
         json: |
           {
             "annotations": {
@@ -238,7 +238,7 @@ grafana:
                 "type": "row"
               },
               {
-                "content": "<img width=\"160px\" src=\"https://thorchain.org/assets/img/thorchain-white-text.svg\" />",
+                "content": "<img width=\"160px\" src=\"https://switchly.org/assets/img/switchly-white-text.svg\" />",
                 "datasource": "Prometheus",
                 "fieldConfig": {
                   "defaults": {
@@ -1407,7 +1407,7 @@ grafana:
                   "lineColor": "#ef843c",
                   "show": false
                 },
-                "tableColumn": "tendermint_mempool_recheck_times{chain_id=\"thorchain\", endpoint=\"prometheus\", instance=\"10.0.2.67:26660\", job=\"thornode\", namespace=\"genesis\", pod=\"thornode-55f544d977-wchd8\", service=\"thornode\"}",
+                "tableColumn": "tendermint_mempool_recheck_times{chain_id=\"switchly\", endpoint=\"prometheus\", instance=\"10.0.2.67:26660\", job=\"switchlynode\", namespace=\"genesis\", pod=\"switchlynode-55f544d977-wchd8\", service=\"switchlynode\"}",
                 "targets": [
                   {
                     "expr": "tendermint_mempool_recheck_times{chain_id=\"$chain_id\", instance=~\"$instance\"}",
@@ -1669,8 +1669,8 @@ grafana:
                   "allValue": null,
                   "current": {
                     "selected": false,
-                    "text": "thorchain",
-                    "value": "thorchain"
+                    "text": "switchly",
+                    "value": "switchly"
                   },
                   "datasource": "$DS",
                   "definition": "label_values(tendermint_consensus_height, chain_id)",
@@ -1748,7 +1748,7 @@ grafana:
               ]
             },
             "timezone": "",
-            "title": "THORNode / THORChain",
+            "title": "SwitchlyNode / Switchly",
             "uid": "W9vKt2GGz",
             "version": 2
           }
@@ -2561,7 +2561,7 @@ grafana:
                   "lineColor": "#ef843c",
                   "show": false
                 },
-                "tableColumn": "tendermint_mempool_failed_txs{chain_id=\"thorchain\", endpoint=\"prometheus\", instance=\"10.0.61.212:26660\", job=\"thornode\", namespace=\"thornode\", pod=\"thornode-7f87778897-8kvtz\", service=\"thornode\"}",
+                "tableColumn": "tendermint_mempool_failed_txs{chain_id=\"switchly\", endpoint=\"prometheus\", instance=\"10.0.61.212:26660\", job=\"switchlynode\", namespace=\"switchlynode\", pod=\"switchlynode-7f87778897-8kvtz\", service=\"switchlynode\"}",
                 "targets": [
                   {
                     "expr": "tendermint_mempool_failed_txs{chain_id=\"$chain_id\", instance=~\"$instance\"}",
@@ -2656,7 +2656,7 @@ grafana:
                   "lineColor": "#ef843c",
                   "show": false
                 },
-                "tableColumn": "tendermint_mempool_recheck_times{chain_id=\"Binance-Chain-Nile\", endpoint=\"prometheus\", instance=\"10.0.17.250:28660\", job=\"binance-daemon\", namespace=\"thornode\", pod=\"binance-daemon-787d88ff46-475dv\", service=\"binance-daemon\"}",
+                "tableColumn": "tendermint_mempool_recheck_times{chain_id=\"Binance-Chain-Nile\", endpoint=\"prometheus\", instance=\"10.0.17.250:28660\", job=\"binance-daemon\", namespace=\"switchlynode\", pod=\"binance-daemon-787d88ff46-475dv\", service=\"binance-daemon\"}",
                 "targets": [
                   {
                     "expr": "tendermint_mempool_recheck_times{chain_id=\"$chain_id\", instance=~\"$instance\"}",
@@ -3000,11 +3000,11 @@ grafana:
               ]
             },
             "timezone": "",
-            "title": "THORNode / Binance Chain",
+            "title": "SwitchlyNode / Binance Chain",
             "uid": "UJyurCTWz",
             "version": 11
           }
-      bifrost_thornode_logs:
+      bifrost_switchlynode_logs:
         json: |
           {
             "annotations": {
@@ -3091,11 +3091,11 @@ grafana:
                 },
                 "targets": [
                   {
-                    "expr": "{container=\"thornode\"} |~ \"(?i)$search_text\" ",
+                    "expr": "{container=\"switchlynode\"} |~ \"(?i)$search_text\" ",
                     "refId": "A"
                   }
                 ],
-                "title": "Thornode logs",
+                "title": "Switchlynode logs",
                 "type": "logs"
               }
             ],
@@ -3134,7 +3134,7 @@ grafana:
             },
             "timepicker": {},
             "timezone": "",
-            "title": "THORNode / Thornode and Bifrost logs",
+            "title": "SwitchlyNode / Switchlynode and Bifrost logs",
             "uid": "uddVVg27k",
             "version": 1,
             "weekStart": ""
@@ -3228,7 +3228,7 @@ grafana:
                     },
                     "editorMode": "code",
                     "exemplar": false,
-                    "expr": "round(sum(increase(thornode_point_slash{address=~\".*$address.*\"}[$__range]))-sum(increase(thornode_point_slash_refund{address=~\".*$address.*\"}[$__range])),1)>0",
+                    "expr": "round(sum(increase(switchlynode_point_slash{address=~\".*$address.*\"}[$__range]))-sum(increase(switchlynode_point_slash_refund{address=~\".*$address.*\"}[$__range])),1)>0",
                     "format": "table",
                     "hide": false,
                     "instant": true,
@@ -3312,7 +3312,7 @@ grafana:
                     },
                     "editorMode": "code",
                     "exemplar": false,
-                    "expr": "round(sum(increase(thornode_point_slash{address=~\".*$address.*\"}[$__range])) by (chain)-sum(increase(thornode_point_slash_refund{address=~\".*$address.*\"}[$__range])) by (chain),1)>0",
+                    "expr": "round(sum(increase(switchlynode_point_slash{address=~\".*$address.*\"}[$__range])) by (chain)-sum(increase(switchlynode_point_slash_refund{address=~\".*$address.*\"}[$__range])) by (chain),1)>0",
                     "format": "table",
                     "hide": false,
                     "instant": true,
@@ -3396,7 +3396,7 @@ grafana:
                     },
                     "editorMode": "code",
                     "exemplar": false,
-                    "expr": "round(sum(increase(thornode_point_slash{address=~\".*$address.*\"}[$__range])) by (reason)-sum(increase(thornode_point_slash_refund{address=~\".*$address.*\"}[$__range])) by (reason),1)>0",
+                    "expr": "round(sum(increase(switchlynode_point_slash{address=~\".*$address.*\"}[$__range])) by (reason)-sum(increase(switchlynode_point_slash_refund{address=~\".*$address.*\"}[$__range])) by (reason),1)>0",
                     "format": "table",
                     "hide": false,
                     "instant": true,
@@ -3510,7 +3510,7 @@ grafana:
                       "uid": "7CGZFBmVk"
                     },
                     "editorMode": "code",
-                    "expr": "round(sum(increase(thornode_point_slash{address=~\".*$address.*\"}[$__interval])) by (chain) - sum(increase(thornode_point_slash_refund{address=~\".*$address.*\"}[$__interval])) by (chain), 1) > 1",
+                    "expr": "round(sum(increase(switchlynode_point_slash{address=~\".*$address.*\"}[$__interval])) by (chain) - sum(increase(switchlynode_point_slash_refund{address=~\".*$address.*\"}[$__interval])) by (chain), 1) > 1",
                     "interval": "",
                     "legendFormat": "{{chain}}",
                     "range": true,
@@ -3616,7 +3616,7 @@ grafana:
                       "uid": "7CGZFBmVk"
                     },
                     "editorMode": "code",
-                    "expr": "round(sum(increase(thornode_point_slash{address=~\".*$address.*\"}[$__interval])) by (reason) - sum(increase(thornode_point_slash_refund{address=~\".*$address.*\"}[$__interval])) by (reason), 1) > 1",
+                    "expr": "round(sum(increase(switchlynode_point_slash{address=~\".*$address.*\"}[$__interval])) by (reason) - sum(increase(switchlynode_point_slash_refund{address=~\".*$address.*\"}[$__interval])) by (reason), 1) > 1",
                     "interval": "",
                     "legendFormat": "{{reason}}",
                     "range": true,
@@ -3669,7 +3669,7 @@ grafana:
             },
             "timepicker": {},
             "timezone": "",
-            "title": "THORNode / Node Slash",
+            "title": "SwitchlyNode / Node Slash",
             "uid": "5XvM_nWVkx",
             "version": 2,
             "weekStart": ""

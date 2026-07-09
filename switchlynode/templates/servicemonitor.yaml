@@ -1,15 +1,15 @@
 apiVersion: monitoring.coreos.com/v1
 kind: ServiceMonitor
 metadata:
-  name: {{ .Release.Name }}-{{ include "thornode.name" . }}
+  name: {{ .Release.Name }}-{{ include "switchlynode.name" . }}
   namespace: prometheus-system
   labels:
-    {{- include "thornode.labels" . | nindent 4 }}
+    {{- include "switchlynode.labels" . | nindent 4 }}
     release: prometheus
 spec:
   selector:
     matchLabels:
-      {{- include "thornode.selectorLabels" . | nindent 6 }}
+      {{- include "switchlynode.selectorLabels" . | nindent 6 }}
   namespaceSelector:
     matchNames:
     - {{ .Release.Namespace }}

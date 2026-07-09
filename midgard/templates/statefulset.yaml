@@ -36,7 +36,7 @@ spec:
         - name: init-thor
           image: busybox:{{ .Values.global.images.busybox.tag }}@sha256:{{ .Values.global.images.busybox.hash }}
           imagePullPolicy: IfNotPresent
-          command: ['sh', '-c', "until nc -zv {{ .Values.thorApi }}; do echo waiting for thornode; sleep 2; done"]
+          command: ['sh', '-c', "until nc -zv {{ .Values.thorApi }}; do echo waiting for switchlynode; sleep 2; done"]
         {{- if .Values.genesis.remote }}
         - name: init-genesis
           image: alpine/k8s:{{ .Values.global.images.alpineK8s.tag }}@sha256:{{ .Values.global.images.alpineK8s.hash }}
@@ -77,11 +77,11 @@ spec:
             subPath: entrypoint.sh
           - name: blockstore-config
             {{- if eq "mainnet" .Values.net }}
-            mountPath: /resources/hashes/thorchain
+            mountPath: /resources/hashes/switchly
             {{- else if eq "stagenet" .Values.net }}
-            mountPath: /resources/hashes/thorchain-stagenet-1
+            mountPath: /resources/hashes/switchly-stagenet-1
             {{- end }}
-            subPath: thorchain-blockstore-hashes
+            subPath: switchly-blockstore-hashes
           - name: blockstore
             mountPath: /blockstore
           ports:

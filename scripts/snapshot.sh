@@ -10,8 +10,8 @@ fi
 
 get_node_info_short
 if [ "$SERVICE" == "" ]; then
-  echo "=> Select a THORNode service to snapshot"
-  menu thornode thornode bifrost midgard binance-smart-daemon bitcoin-daemon bitcoin-cash-daemon dogecoin-daemon ethereum-daemon litecoin-daemon gaia-daemon avalanche-daemon
+  echo "=> Select a SwitchlyNode service to snapshot"
+  menu switchlynode switchlynode bifrost midgard binance-smart-daemon bitcoin-daemon bitcoin-cash-daemon dogecoin-daemon ethereum-daemon litecoin-daemon gaia-daemon avalanche-daemon
   SERVICE=$MENU_SELECTED
 fi
 

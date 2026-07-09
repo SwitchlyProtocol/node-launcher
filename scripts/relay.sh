@@ -34,4 +34,4 @@ if [[ -z ${DISCORD_MESSAGE} ]]; then
   exit 1
 fi
 
-kubectl exec -it -n "$NAME" -c thornode deploy/thornode -- /kube-scripts/retry.sh /kube-scripts/relay.sh "$DISCORD_CHANNEL" "$DISCORD_MESSAGE"
+kubectl exec -it -n "$NAME" -c switchlynode deploy/switchlynode -- /kube-scripts/retry.sh /kube-scripts/relay.sh "$DISCORD_CHANNEL" "$DISCORD_MESSAGE"
