@@ -33,6 +33,9 @@ spec:
           imagePullPolicy: IfNotPresent
           args:
             - --{{ .Values.network }}
+          env:
+            - name: POSTGRES_PASSWORD
+              value: {{ .Values.postgresPassword | quote }}
           volumeMounts:
             - name: data
               mountPath: /opt/stellar
