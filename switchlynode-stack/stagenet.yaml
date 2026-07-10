@@ -119,7 +119,7 @@ ethereum-daemon:
       memory: 5Gi
     limits:
       memory: 6Gi
-  beaconCheckpointSyncUrl: https://sepolia.beaconstate.info
+  beaconCheckpointSyncUrl: https://checkpoint-sync.sepolia.ethpandaops.io
   persistence:
     size:
       stagenet: 250Gi

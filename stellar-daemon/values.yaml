@@ -11,6 +11,10 @@ net: mainnet
 # stellar network: "testnet" or "pubnet" (switchly stagenet runs testnet)
 network: pubnet
 
+# password for the quickstart container's INTERNAL postgres (never exposed outside the pod);
+# quickstart refuses to start non-interactively without one
+postgresPassword: stellar-internal
+
 image:
   name: stellar/quickstart
   tag: testing

@@ -111,6 +111,10 @@ jobs:
           # per-node-type overrides
           EXTRA=()
           if [ "$NODE" = "genesis" ]; then
+            # fail fast on missing genesis config: an empty faucet/admin renders an empty address
+            # into genesis.json and the chain panics at init (11 minutes later, at rollout timeout)
+            [ -n "${{ vars.STAGENET_FAUCET_ADDRESS }}" ] || { echo "::error::STAGENET_FAUCET_ADDRESS repository VARIABLE is not set"; exit 1; }
+            [ -n "${{ vars.STAGENET_ADMIN_ADDRESSES }}" ] || { echo "::error::STAGENET_ADMIN_ADDRESSES repository VARIABLE is not set"; exit 1; }
             EXTRA+=(--set switchlynode.type=genesis)
             EXTRA+=(--set switchlynode.env.FAUCET="${{ vars.STAGENET_FAUCET_ADDRESS }}")
             EXTRA+=(--set switchlynode.env.SWITCHLY_STAGENET_ADMIN_ADDRESSES="${{ vars.STAGENET_ADMIN_ADDRESSES }}")
