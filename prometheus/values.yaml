@@ -7,16 +7,17 @@ prometheus:
     retention: 60d
 
 additionalPrometheusRulesMap:
-  - groups:
-      - name: alert-rules
-        rules:
-          - alert: KubePodRestart
-            expr: rate(kube_pod_container_status_restarts_total[1h]) * 3600 > 1
-            for: 5s
-            labels:
-              severity: critical
-            annotations:
-              message: "Container {{ $labels.container }} in Pod {{$labels.namespace}}/{{$labels.pod}} restarted more than once in the last hour"
+  switchly-alerts:
+    groups:
+        - name: alert-rules
+          rules:
+            - alert: KubePodRestart
+              expr: rate(kube_pod_container_status_restarts_total[1h]) * 3600 > 1
+              for: 5s
+              labels:
+                severity: critical
+              annotations:
+                message: "Container {{ $labels.container }} in Pod {{$labels.namespace}}/{{$labels.pod}} restarted more than once in the last hour"
 
 # See documentation here https://prometheus.io/docs/alerting/latest/configuration/
 # for other configurations other than slack example below
