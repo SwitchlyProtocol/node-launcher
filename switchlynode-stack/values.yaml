@@ -51,3 +51,7 @@ avalanche-daemon:
 
 binance-smart-daemon:
   fullnameOverride: binance-smart-daemon
+
+stellar-daemon:
+  enabled: false
+  fullnameOverride: stellar-daemon

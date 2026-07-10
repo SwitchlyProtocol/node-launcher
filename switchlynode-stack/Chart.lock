@@ -5,8 +5,8 @@ dependencies:
 - name: gateway
   repository: file://../gateway
   version: 0.1.0
-- name: thornode
-  repository: file://../thornode
+- name: switchlynode
+  repository: file://../switchlynode
   version: 0.1.0
 - name: bifrost
   repository: file://../bifrost
@@ -41,5 +41,8 @@ dependencies:
 - name: base-daemon
   repository: file://../base-daemon
   version: 0.1.0
-digest: sha256:d7c5beb91ac30cc636ce09c36e5c908bf515cc5126f6d1db101edf0e07a4d931
-generated: "2024-09-23T17:30:35.108577539-04:00"
+- name: stellar-daemon
+  repository: file://../stellar-daemon
+  version: 0.1.0
+digest: sha256:48ec9fe20a1fd27d2d58cc0cdb7813fbae843fc6c891624400ae639e3bd83dbd
+generated: "2026-07-10T18:42:23.539149+02:00"

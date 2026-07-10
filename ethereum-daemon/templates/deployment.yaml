@@ -45,7 +45,7 @@ spec:
             {{- toYaml .Values.securityContext | nindent 12 }}
           image: {{ .Values.image.eth.name }}:{{ include "daemon.tag" . }}@sha256:{{ .Values.image.eth.hash }}
           imagePullPolicy: IfNotPresent
-          command: [ "sh", "-c", 'geth --syncmode snap --http --http.addr 0.0.0.0 --http.port 8545 --http.api "eth,net,engine,web3,miner,personal,txpool,debug" --http.corsdomain "*" --http.vhosts="*" --authrpc.vhosts="localhost" --authrpc.jwtsecret="/root/jwt.hex"' ]
+          command: [ "sh", "-c", 'geth {{ if ne (.Values.network | default "mainnet") "mainnet" }}--{{ .Values.network }} {{ end }}--syncmode snap --http --http.addr 0.0.0.0 --http.port 8545 --http.api "eth,net,engine,web3,miner,personal,txpool,debug" --http.corsdomain "*" --http.vhosts="*" --authrpc.vhosts="localhost" --authrpc.jwtsecret="/root/jwt.hex"' ]
           volumeMounts:
             - name: entrypoint
               mountPath: /entrypoint
@@ -101,7 +101,7 @@ spec:
             - --jwt-secret=/data/jwt.hex
             - --grpc-gateway-host=0.0.0.0  # used by node status
             - --checkpoint-sync-url={{ .Values.beaconCheckpointSyncUrl }}
-            - --mainnet
+            - --{{ .Values.network | default "mainnet" }}
           ports:
             - name: beacon
               containerPort: 3500

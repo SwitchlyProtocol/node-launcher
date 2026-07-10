@@ -4,6 +4,10 @@
 
 net: mainnet
 
+# Ethereum network for geth + the beacon chain: "mainnet" or "sepolia". Switchly stagenet runs
+# sepolia (the public ethereum testnet).
+network: mainnet
+
 # Leveraging a checkpoint for the beacon chain will use less disk space and reduce sync
 # time for the beacon chain to a few minutes (geth may still take hours or days). One
 # provider list is found at https://eth-clients.github.io/checkpoint-sync-endpoints -

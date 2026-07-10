@@ -44,6 +44,9 @@ spec:
             # descriptors. We'll hold forced upgrade until version 27, which should mark
             # the migratewallet non-experimental (which we can use to migrate at init).
             - -deprecatedrpc=create_bdb
+            {{- range .Values.extraArgs }}
+            - {{ . | quote }}
+            {{- end }}
           volumeMounts:
             - name: data
               mountPath: /home/bitcoin/.bitcoin

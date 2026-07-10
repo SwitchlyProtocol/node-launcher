@@ -88,3 +88,33 @@ bifrost:
 bitcoin-daemon:
   enabled: false
 ```
+
+## Switchly Stagenet CI
+
+The `Deploy stagenet` GitHub workflow automates this process against a Kubernetes cluster using
+`switchlynode-stack/stagenet.yaml` — public testnets with our own in-cluster chain daemons
+(bitcoin testnet3, ethereum sepolia via geth+prysm, stellar testnet via quickstart).
+
+**One-time setup:**
+
+1. Provision a Kubernetes cluster with any provider: 3+ nodes of at least 4 vCPU / 8GB each
+   (autoscaling recommended — the chain daemons need the room), and export its kubeconfig.
+
+2. Repository secrets: `STAGENET_KUBECONFIG` (the kubeconfig, base64-encoded:
+   `base64 < kubeconfig.yaml`), `STAGENET_NODE_PASSWORD`.
+   Repository variables: `STAGENET_FAUCET_ADDRESS`, `STAGENET_ADMIN_ADDRESSES`
+   (create the master wallet locally: `switchlynode keys add stagenet-master`).
+
+3. Install prometheus CRDs + monitoring once per cluster: `make repos tools`.
+
+**Rollout:** run the workflow with `action=install node=genesis`, wait for blocks, then install
+`validator-1` … `validator-5` one at a time (six nodes total). Every node generates a FRESH
+mnemonic in-cluster on first install — back each up immediately:
+`make mnemonic NAME=switchly-stagenet-<node>`. Then bond each validator from the master wallet per
+the standard joining flow above.
+
+**Upgrades (no state loss):** merges to `switchlynode` main publish a new `stagenet` image; run the
+workflow with `action=upgrade`. Nodes are upgraded one at a time — helm upgrade on PVC-backed state,
+wait for rollout, wait until the node reports `catching_up=false` — so the chain never halts and no
+history is lost. Consensus-version activation is coordinated on-chain by native version voting once
+a supermajority of active nodes runs the new version.
