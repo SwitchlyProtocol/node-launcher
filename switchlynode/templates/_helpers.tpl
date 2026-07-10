@@ -2,7 +2,7 @@
 {{/*
 Expand the name of the chart.
 */}}
-{{- define "thornode.name" -}}
+{{- define "switchlynode.name" -}}
 {{- default .Chart.Name .Values.nameOverride | trunc 63 | trimSuffix "-" -}}
 {{- end -}}
 
@@ -11,7 +11,7 @@ Create a default fully qualified app name.
 We truncate at 63 chars because some Kubernetes name fields are limited to this (by the DNS naming spec).
 If release name contains chart name it will be used as a full name.
 */}}
-{{- define "thornode.fullname" -}}
+{{- define "switchlynode.fullname" -}}
 {{- if .Values.fullnameOverride -}}
 {{- .Values.fullnameOverride | trunc 63 | trimSuffix "-" -}}
 {{- else -}}
@@ -27,36 +27,36 @@ If release name contains chart name it will be used as a full name.
 {{/*
 Create chart name and version as used by the chart label.
 */}}
-{{- define "thornode.chart" -}}
+{{- define "switchlynode.chart" -}}
 {{- printf "%s-%s" .Chart.Name .Chart.Version | replace "+" "_" | trunc 63 | trimSuffix "-" -}}
 {{- end -}}
 
 {{/*
 Common labels
 */}}
-{{- define "thornode.labels" -}}
-helm.sh/chart: {{ include "thornode.chart" . }}
-{{ include "thornode.selectorLabels" . }}
-app.kubernetes.io/version: {{ include "thornode.tag" . | quote }}
+{{- define "switchlynode.labels" -}}
+helm.sh/chart: {{ include "switchlynode.chart" . }}
+{{ include "switchlynode.selectorLabels" . }}
+app.kubernetes.io/version: {{ include "switchlynode.tag" . | quote }}
 app.kubernetes.io/managed-by: {{ .Release.Service }}
-app.kubernetes.io/net: {{ include "thornode.net" . }}
+app.kubernetes.io/net: {{ include "switchlynode.net" . }}
 app.kubernetes.io/type: {{ .Values.type }}
 {{- end -}}
 
 {{/*
 Selector labels
 */}}
-{{- define "thornode.selectorLabels" -}}
-app.kubernetes.io/name: {{ include "thornode.name" . }}
+{{- define "switchlynode.selectorLabels" -}}
+app.kubernetes.io/name: {{ include "switchlynode.name" . }}
 app.kubernetes.io/instance: {{ .Release.Name }}
 {{- end -}}
 
 {{/*
 Create the name of the service account to use
 */}}
-{{- define "thornode.serviceAccountName" -}}
+{{- define "switchlynode.serviceAccountName" -}}
 {{- if .Values.serviceAccount.create -}}
-    {{ default (include "thornode.fullname" .) .Values.serviceAccount.name }}
+    {{ default (include "switchlynode.fullname" .) .Values.serviceAccount.name }}
 {{- else -}}
     {{ default "default" .Values.serviceAccount.name }}
 {{- end -}}
@@ -65,36 +65,36 @@ Create the name of the service account to use
 {{/*
 Net
 */}}
-{{- define "thornode.net" -}}
+{{- define "switchlynode.net" -}}
 {{- default .Values.net .Values.global.net -}}
 {{- end -}}
 
 {{/*
 Tag
 */}}
-{{- define "thornode.tag" -}}
+{{- define "switchlynode.tag" -}}
 {{- coalesce  .Values.global.tag .Values.image.tag .Chart.AppVersion -}}
 {{- end -}}
 
 {{/*
 Image
 */}}
-{{- define "thornode.image" -}}
+{{- define "switchlynode.image" -}}
 {{/* A hash is not needed for mocknet, or in the case that a node is not a validator w/ key material and autoupdate is enabled. */}}
 {{- if and .Values.autoupdate.enabled (eq .Values.type "fullnode") -}}
-{{- .Values.image.repository -}}:{{ include "thornode.tag" . }}
+{{- .Values.image.repository -}}:{{ include "switchlynode.tag" . }}
 {{- else -}}
-{{- .Values.image.repository -}}:{{ include "thornode.tag" . }}@sha256:{{ coalesce .Values.global.hash .Values.image.hash }}
+{{- .Values.image.repository -}}:{{ include "switchlynode.tag" . }}@sha256:{{ coalesce .Values.global.hash .Values.image.hash }}
 {{- end -}}
 {{- end -}}
 
 {{/*
 RPC Port
 */}}
-{{- define "thornode.rpc" -}}
-{{- if eq (include "thornode.net" .) "mainnet" -}}
+{{- define "switchlynode.rpc" -}}
+{{- if eq (include "switchlynode.net" .) "mainnet" -}}
     {{ .Values.service.port.mainnet.rpc}}
-{{- else if eq (include "thornode.net" .) "stagenet" -}}
+{{- else if eq (include "switchlynode.net" .) "stagenet" -}}
     {{ .Values.service.port.stagenet.rpc}}
 {{- else -}}
     {{ .Values.service.port.mainnet.rpc}}
@@ -104,10 +104,10 @@ RPC Port
 {{/*
 GRPC Port
 */}}
-{{- define "thornode.grpc" -}}
-{{- if eq (include "thornode.net" .) "mainnet" -}}
+{{- define "switchlynode.grpc" -}}
+{{- if eq (include "switchlynode.net" .) "mainnet" -}}
     {{ .Values.service.port.mainnet.grpc}}
-{{- else if eq (include "thornode.net" .) "stagenet" -}}
+{{- else if eq (include "switchlynode.net" .) "stagenet" -}}
     {{ .Values.service.port.stagenet.grpc}}
 {{- else -}}
     {{ .Values.service.port.mainnet.grpc}}
@@ -117,10 +117,10 @@ GRPC Port
 {{/*
 P2P Port
 */}}
-{{- define "thornode.p2p" -}}
-{{- if eq (include "thornode.net" .) "mainnet" -}}
+{{- define "switchlynode.p2p" -}}
+{{- if eq (include "switchlynode.net" .) "mainnet" -}}
     {{ .Values.service.port.mainnet.p2p}}
-{{- else if eq (include "thornode.net" .) "stagenet" -}}
+{{- else if eq (include "switchlynode.net" .) "stagenet" -}}
     {{ .Values.service.port.stagenet.p2p}}
 {{- else -}}
     {{ .Values.service.port.mainnet.p2p}}
@@ -130,10 +130,10 @@ P2P Port
 {{/*
 chain id
 */}}
-{{- define "thornode.chainID" -}}
-{{- if eq (include "thornode.net" .) "mainnet" -}}
+{{- define "switchlynode.chainID" -}}
+{{- if eq (include "switchlynode.net" .) "mainnet" -}}
     {{ .Values.chainID.mainnet}}
-{{- else if eq (include "thornode.net" .) "stagenet" -}}
+{{- else if eq (include "switchlynode.net" .) "stagenet" -}}
     {{ .Values.chainID.stagenet}}
 {{- else -}}
     {{ .Values.chainID.mainnet}}

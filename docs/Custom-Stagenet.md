@@ -6,7 +6,7 @@ The process for deploying a custom `stagenet` is straightforward, however this g
 
 ## Process
 
-1. Build a local `thornode` binary by running the following in the **`thornode`** repository from the tag of the version to be deployed:
+1. Build a local `switchlynode` binary by running the following in the **`switchlynode`** repository from the tag of the version to be deployed:
 
 ```bash
 TAG=stagenet make install
@@ -15,26 +15,26 @@ TAG=stagenet make install
 2. Create a new key pair to use as the master key for the network (funding faucet and admin mimir). Example:
 
 ```bash
-thornode keys add stagenet-master
+switchlynode keys add stagenet-master
 ```
 
-3. Add the following overrides in `thornode-stack/stagenet.yaml`:
+3. Add the following overrides in `switchlynode-stack/stagenet.yaml`:
 
 ```yaml
-thornode:
+switchlynode:
   net: stagenet
   chainID:
     stagenet: <your-chain-id>
   env:
     # use the "sthor" address for the key created above as the faucet and mimir admin
     FAUCET: "<your-stagenet-master-address>"
-    THOR_STAGENET_ADMIN_ADDRESSES: "<your-stagenet-master-address>"
+    SWITCHLY_STAGENET_ADMIN_ADDRESSES: "<your-stagenet-master-address>"
 
     # set seed nodes endpoint empty on the genesis node
-    THOR_SEED_NODES_ENDPOINT: ""
+    SWITCHLY_SEED_NODES_ENDPOINT: ""
 
     # set to genesis node on other validators
-    # THOR_SEED_NODES_ENDPOINT: "http://thornode.<genesis-namespace>.svc.cluster.local:1317/thorchain/nodes"
+    # SWITCHLY_SEED_NODES_ENDPOINT: "http://switchlynode.<genesis-namespace>.svc.cluster.local:1317/switchly/nodes"
 
     # can re-use existing router contract deployments, or deploy your own new ones
     ETH_CONTRACT: "0xB11a1735C2e3BCC5FC8c1d147fb64629d3d0caC5"
@@ -47,10 +47,10 @@ bifrost:
   peer: gateway.<genesis-namespace>.svc.cluster.local # optionally use LB IP address if in cloud
   env:
     # set seed nodes endpoint empty on the genesis node
-    THOR_SEED_NODES_ENDPOINT: ""
+    SWITCHLY_SEED_NODES_ENDPOINT: ""
 
     # set to genesis node on other validators
-    # THOR_SEED_NODES_ENDPOINT: "http://thornode.<genesis-namespace>.svc.cluster.local:1317/thorchain/nodes"
+    # SWITCHLY_SEED_NODES_ENDPOINT: "http://switchlynode.<genesis-namespace>.svc.cluster.local:1317/switchly/nodes"
 ```
 
 4. Deploy the genesis node. Example:
@@ -65,21 +65,21 @@ NAME=stagenet-genesis TYPE=genesis NET=stagenet make install
 NAME=stagenet-validator-1 TYPE=validator NET=stagenet make install
 ```
 
-6. Bond each new validator from the master wallet and perform the standard initialization commands (https://docs.thorchain.org/thornodes/joining).
+6. Bond each new validator from the master wallet and perform the standard initialization commands (https://docs.switchly.org/switchlynodes/joining).
 
 7. Set the churn interval with admin mimir to begin churning and get more active nodes. After first churn increase the interval or set `HaltChurning` to `1` to prevent migration gas waste. Example:
 
 ```bash
-thornode tx thorchain mimir ChurnInterval --from stagenet-master --chain-id <your-chain-id> --node http://localhost:27147 -- 100
+switchlynode tx switchly mimir ChurnInterval --from stagenet-master --chain-id <your-chain-id> --node http://localhost:27147 -- 100
 ```
 
-8. Create pools and perform whatever testing you desire. Network usage docs: https://dev.thorchain.org/.
+8. Create pools and perform whatever testing you desire. Network usage docs: https://dev.switchly.org/.
 
 ## Other Notes
 
 - You can share a single set of daemons in a separate namespace for the genesis node and all validators. See related docs in [Multi-Validator-Cluster.md](Multi-Validator-Cluster.md).
 
-- You can run with a subset of external chains by flagging off undesired ones in `thornode-stack/stagenet.yaml`. Example additions to disable BTC:
+- You can run with a subset of external chains by flagging off undesired ones in `switchlynode-stack/stagenet.yaml`. Example additions to disable BTC:
 
 ```yaml
 bifrost:

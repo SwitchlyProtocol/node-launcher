@@ -5,7 +5,7 @@ source ./scripts/core.sh
 get_node_info_short
 get_node_service
 
-echo "=> Halting service $boldyellow$SERVICE$reset of a THORNode named $boldyellow$NAME$reset"
+echo "=> Halting service $boldyellow$SERVICE$reset of a SwitchlyNode named $boldyellow$NAME$reset"
 echo
 confirm
 

@@ -1,6 +1,6 @@
 apiVersion: v2
 name: provider
-description: Thorchain core service provider
+description: Switchly core service provider
 type: application
 version: 0.1.0
 

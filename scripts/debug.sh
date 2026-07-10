@@ -2,11 +2,11 @@
 
 source ./scripts/core.sh
 
-# pull the current pinned alpine/k8s version from thornode chart
+# pull the current pinned alpine/k8s version from switchlynode chart
 get_alpine_img() {
   # shellcheck disable=SC2046,SC2312
   yq -r '.global.images.alpineK8s | "alpine/k8s:" + .tag + "@sha256:" + .hash' \
-    <"$(dirname $(readlink -f $0))"/../thornode/values.yaml
+    <"$(dirname $(readlink -f $0))"/../switchlynode/values.yaml
 }
 
 # prompt for namespace if unset

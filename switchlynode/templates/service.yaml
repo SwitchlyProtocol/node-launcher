@@ -1,9 +1,9 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ include "thornode.fullname" . }}
+  name: {{ include "switchlynode.fullname" . }}
   labels:
-    {{- include "thornode.labels" . | nindent 4 }}
+    {{- include "switchlynode.labels" . | nindent 4 }}
   annotations:
     # AWS
     service.beta.kubernetes.io/aws-load-balancer-cross-zone-load-balancing-enabled: "true"
@@ -21,15 +21,15 @@ spec:
       targetPort: api
       protocol: TCP
     - name: p2p
-      port: {{ include "thornode.p2p" . }}
+      port: {{ include "switchlynode.p2p" . }}
       targetPort: p2p
       protocol: TCP
     - name: rpc
-      port: {{ include "thornode.rpc" . }}
+      port: {{ include "switchlynode.rpc" . }}
       targetPort: rpc
       protocol: TCP
     - name: grpc
-      port: {{ include "thornode.grpc" . }}
+      port: {{ include "switchlynode.grpc" . }}
       targetPort: grpc
       protocol: TCP
     - name: prometheus
@@ -37,4 +37,4 @@ spec:
       targetPort: prometheus
       protocol: TCP
   selector:
-    {{- include "thornode.selectorLabels" . | nindent 4 }}
+    {{- include "switchlynode.selectorLabels" . | nindent 4 }}

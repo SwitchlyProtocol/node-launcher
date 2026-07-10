@@ -5,7 +5,7 @@
 net: mainnet
 
 signer:
-  name: thorchain
+  name: switchly
   password: password
   mnemonicSecret: ""
   passwordSecret: ""
@@ -16,7 +16,7 @@ peer:
 debug: false
 
 # provide custom environment variables to override config defaults:
-# https://gitlab.com/thorchain/thornode/-/blob/develop/config/default.yaml
+# https://github.com/SwitchlyProtocol/switchlynode/-/blob/develop/config/default.yaml
 env:
   BIFROST_CHAINS_BTC_SCANNER_LEVELDB_COMPACTION_TABLE_SIZE_MULTIPLIER: "1"
 
@@ -41,14 +41,14 @@ secretEnv:
   # - BIFROST_CHAINS_BASE_USERNAME
   # - BIFROST_CHAINS_BASE_PASSWORD
 
-thorApi: thornode:1317
+thorApi: switchlynode:1317
 chainID:
-  mainnet: thorchain-1
-  stagenet: thorchain-stagenet-2
+  mainnet: switchly-1
+  stagenet: switchly-stagenet-2
 
 thorDaemon:
-  mainnet: thornode:27147
-  stagenet: thornode:27147
+  mainnet: switchlynode:27147
+  stagenet: switchlynode:27147
 
 bitcoinDaemon:
   enabled: true
@@ -96,7 +96,7 @@ replicaCount: 1
 strategyType: Recreate
 
 image:
-  repository: registry.gitlab.com/thorchain/thornode
+  repository: ghcr.io/switchlyprotocol/switchlynode
   pullPolicy: IfNotPresent
   tag: mainnet
   hash: placeholder

@@ -3,7 +3,7 @@
 . ./scripts/gitlab.sh
 
 # get auth for container registry
-REGISTRY=thorchain/midgard
+REGISTRY=switchly/midgard
 TOKEN=$(gitlab_registry_token $REGISTRY)
 
 echo "Checking midgard..."

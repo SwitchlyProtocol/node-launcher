@@ -2,15 +2,15 @@
 kind: PersistentVolumeClaim
 apiVersion: v1
 metadata:
-  name: {{ template "thornode.fullname" . }}
+  name: {{ template "switchlynode.fullname" . }}
   labels:
-    {{- include "thornode.labels" . | nindent 4 }}
+    {{- include "switchlynode.labels" . | nindent 4 }}
 spec:
   accessModes:
     - {{ .Values.persistence.accessMode | quote }}
   resources:
     requests:
-      {{- if eq (include "thornode.net" .) "stagenet" }}
+      {{- if eq (include "switchlynode.net" .) "stagenet" }}
       storage: {{ .Values.persistence.size.stagenet | quote }}
       {{- else }}
       storage: {{ .Values.persistence.size.mainnet | quote }}

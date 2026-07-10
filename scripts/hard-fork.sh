@@ -19,14 +19,14 @@ fi
 
 get_node_info_short
 
-node_exists || die "No existing THORNode found, make sure this is the correct name"
+node_exists || die "No existing SwitchlyNode found, make sure this is the correct name"
 
-echo "=> Hard forking THORNode chain state at block height $boldyellow$HARDFORK_BLOCK_HEIGHT$reset from $boldgreen$NAME$reset"
+echo "=> Hard forking SwitchlyNode chain state at block height $boldyellow$HARDFORK_BLOCK_HEIGHT$reset from $boldgreen$NAME$reset"
 confirm
 
 if [ -z "$IMAGE" ]; then
-  IMAGE=$(kubectl -n "$NAME" get deploy/thornode -o jsonpath='{$.spec.template.spec.containers[:1].image}')
-  echo "IMAGE was unset - using current THORNode image for export: $IMAGE"
+  IMAGE=$(kubectl -n "$NAME" get deploy/switchlynode -o jsonpath='{$.spec.template.spec.containers[:1].image}')
+  echo "IMAGE was unset - using current SwitchlyNode image for export: $IMAGE"
 fi
 
 SPEC=$(
@@ -52,14 +52,14 @@ SPEC=$(
           },
           {
             "name": "SIGNER_NAME",
-            "value":"thorchain"
+            "value":"switchly"
           },
           {
             "name": "SIGNER_PASSWD",
             "valueFrom": {
               "secretKeyRef": {
                 "key": "password",
-                "name": "thornode-password"
+                "name": "switchlynode-password"
               }
             }
           },
@@ -75,13 +75,13 @@ SPEC=$(
         "volumeMounts": [{"mountPath": "/root", "name":"data"}]
       }
     ],
-    "volumes": [{"name": "data", "persistentVolumeClaim": {"claimName": "thornode"}}]
+    "volumes": [{"name": "data", "persistentVolumeClaim": {"claimName": "switchlynode"}}]
   }
 }
 EOF
 )
 
-kubectl scale -n "$NAME" --replicas=0 deploy/thornode --timeout=5m
-kubectl wait --for=delete pods -l app.kubernetes.io/name=thornode -n "$NAME" --timeout=5m >/dev/null 2>&1 || true
+kubectl scale -n "$NAME" --replicas=0 deploy/switchlynode --timeout=5m
+kubectl wait --for=delete pods -l app.kubernetes.io/name=switchlynode -n "$NAME" --timeout=5m >/dev/null 2>&1 || true
 kubectl run -n "$NAME" -it --rm --quiet hard-fork --restart=Never --image="$IMAGE" --overrides="$SPEC"
 # don't scale it back up after hard fork , need to run make install instead

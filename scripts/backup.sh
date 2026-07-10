@@ -5,12 +5,12 @@ source ./scripts/core.sh
 get_node_info_short
 
 if ! node_exists; then
-  die "No existing THORNode found, make sure this is the correct name"
+  die "No existing SwitchlyNode found, make sure this is the correct name"
 fi
 
 if [ "$SERVICE" = "" ]; then
-  echo "=> Select a THORNode service to backup"
-  menu thornode thornode bifrost
+  echo "=> Select a SwitchlyNode service to backup"
+  menu switchlynode switchlynode bifrost
   SERVICE=$MENU_SELECTED
 fi
 
@@ -24,4 +24,4 @@ make_backup "$SERVICE"
 
 echo
 warn "If you plan to restore this backup to a fresh install, see more detailed instructions:"
-echo https://gitlab.com/thorchain/devops/node-launcher/-/blob/master/docs/Restore-Validator-Backup.md?ref_type=heads
+echo https://github.com/SwitchlyProtocol/node-launcher/-/blob/master/docs/Restore-Validator-Backup.md?ref_type=heads

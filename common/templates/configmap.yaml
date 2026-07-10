@@ -7,7 +7,7 @@ data:
     #!/bin/bash
     set -euo pipefail
 
-    SIGNER_NAME="${SIGNER_NAME:=thorchain}"
+    SIGNER_NAME="${SIGNER_NAME:=switchly}"
     SIGNER_PASSWD="${SIGNER_PASSWD:=password}"
     BTC_HOST=http://${SIGNER_NAME}:${SIGNER_PASSWD}@localhost:8332
 

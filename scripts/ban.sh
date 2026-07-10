@@ -9,4 +9,4 @@ echo "=> Banning node address $boldyellow$NODE_ADDRESS$reset. Banning a node cos
 echo
 confirm
 
-kubectl exec -it -n "$NAME" -c thornode deploy/thornode -- /kube-scripts/ban.sh "$NODE_ADDRESS"
+kubectl exec -it -n "$NAME" -c switchlynode deploy/switchlynode -- /kube-scripts/ban.sh "$NODE_ADDRESS"

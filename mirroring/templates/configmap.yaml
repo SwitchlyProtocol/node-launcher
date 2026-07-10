@@ -5,12 +5,12 @@ metadata:
   name: mirror-app
 data:
   repos: |
-    gitlab.com/thorchain/thornode
-    gitlab.com/thorchain/devops/node-launcher
-    gitlab.com/thorchain/devops/cluster-launcher
-    gitlab.com/thorchain/midgard
-    gitlab.com/thorchain/tss/tss-lib
-    gitlab.com/thorchain/ledger-thorchain-go
+    github.com/SwitchlyProtocol/switchlynode
+    github.com/SwitchlyProtocol/node-launcher
+    github.com/SwitchlyProtocol/cluster-launcher
+    github.com/SwitchlyProtocol/midgard
+    github.com/SwitchlyProtocol/tss/tss-lib
+    github.com/SwitchlyProtocol/ledger-switchly-go
     github.com/asgardex/asgardex-desktop
 
   entrypoint.sh: |

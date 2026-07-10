@@ -52,10 +52,10 @@ spec:
           sysctl -w net.ipv4.tcp_keepalive_probes=3
         securityContext:
           privileged: true
-      - name: init-thorchain
+      - name: init-switchly
         image: busybox:{{ .Values.global.images.busybox.tag }}@sha256:{{ .Values.global.images.busybox.hash }}
         imagePullPolicy: IfNotPresent
-        command: ['sh', '-c', 'until nc -zv {{ .Values.thorApi }}; do echo waiting for thornode; sleep 2; done']
+        command: ['sh', '-c', 'until nc -zv {{ .Values.thorApi }}; do echo waiting for switchlynode; sleep 2; done']
       containers:
         - name: {{ .Chart.Name }}
           securityContext:
@@ -72,9 +72,9 @@ spec:
             - mountPath: /var/data/bifrost
               name: data
               subPath: data
-            - mountPath: /root/.thornode
+            - mountPath: /root/.switchlynode
               name: data
-              subPath: thornode
+              subPath: switchlynode
             - mountPath: /etc/bifrost
               name: data
               subPath: etc
