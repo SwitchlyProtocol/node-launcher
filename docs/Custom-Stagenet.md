@@ -89,24 +89,20 @@ bitcoin-daemon:
   enabled: false
 ```
 
-## Switchly Stagenet CI (DigitalOcean)
+## Switchly Stagenet CI
 
-The `Deploy stagenet` GitHub workflow automates this process against a DOKS cluster using
+The `Deploy stagenet` GitHub workflow automates this process against a Kubernetes cluster using
 `switchlynode-stack/stagenet.yaml` — public testnets with our own in-cluster chain daemons
 (bitcoin testnet3, ethereum sepolia via geth+prysm, stellar testnet via quickstart).
 
 **One-time setup:**
 
-1. Create the cluster (per-node ~8GB; the chain daemons need the room):
+1. Provision a Kubernetes cluster with any provider: 3+ nodes of at least 4 vCPU / 8GB each
+   (autoscaling recommended — the chain daemons need the room), and export its kubeconfig.
 
-   ```bash
-   doctl kubernetes cluster create switchly-stagenet \
-     --region fra1 --version latest \
-     --node-pool "name=default;size=s-4vcpu-8gb;count=3;auto-scale=true;min-nodes=3;max-nodes=8"
-   ```
-
-2. Repository secrets: `DIGITALOCEAN_ACCESS_TOKEN`, `STAGENET_NODE_PASSWORD`.
-   Repository variables: `DOKS_CLUSTER`, `STAGENET_FAUCET_ADDRESS`, `STAGENET_ADMIN_ADDRESSES`
+2. Repository secrets: `STAGENET_KUBECONFIG` (the kubeconfig, base64-encoded:
+   `base64 < kubeconfig.yaml`), `STAGENET_NODE_PASSWORD`.
+   Repository variables: `STAGENET_FAUCET_ADDRESS`, `STAGENET_ADMIN_ADDRESSES`
    (create the master wallet locally: `switchlynode keys add stagenet-master`).
 
 3. Install prometheus CRDs + monitoring once per cluster: `make repos tools`.

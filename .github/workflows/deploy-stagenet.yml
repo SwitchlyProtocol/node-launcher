@@ -1,8 +1,8 @@
 name: Deploy stagenet
 
-# Deploys and upgrades the Switchly stagenet on DigitalOcean Kubernetes (DOKS) using the
-# switchlynode-stack chart with switchlynode-stack/stagenet.yaml (public testnets, own in-cluster
-# chain daemons: bitcoin testnet3, ethereum sepolia, stellar testnet).
+# Deploys and upgrades the Switchly stagenet on a Kubernetes cluster using the switchlynode-stack
+# chart with switchlynode-stack/stagenet.yaml (public testnets, own in-cluster chain daemons:
+# bitcoin testnet3, ethereum sepolia, stellar testnet).
 #
 # install: deploys ONE node (genesis or validator-N) into its own namespace. Each node gets a FRESH
 #   mnemonic generated in-cluster on first install (stored only as the switchlynode-mnemonic secret
@@ -17,10 +17,9 @@ name: Deploy stagenet
 #   version.
 #
 # Required repository secrets:
-#   DIGITALOCEAN_ACCESS_TOKEN  DO API token (doctl)
+#   STAGENET_KUBECONFIG        kubeconfig for the target cluster (base64-encoded)
 #   STAGENET_NODE_PASSWORD     keystore password shared by the stagenet nodes
 # Required repository variables:
-#   DOKS_CLUSTER               DOKS cluster name
 #   STAGENET_FAUCET_ADDRESS    master wallet address (faucet, genesis only)
 #   STAGENET_ADMIN_ADDRESSES   admin mimir address(es), usually the same wallet
 on:
@@ -59,12 +58,14 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - uses: digitalocean/action-doctl@v2
-        with:
-          token: ${{ secrets.DIGITALOCEAN_ACCESS_TOKEN }}
-
-      - name: fetch kubeconfig
-        run: doctl kubernetes cluster kubeconfig save "${{ vars.DOKS_CLUSTER }}"
+      - name: configure cluster access
+        env:
+          KUBECONFIG_B64: ${{ secrets.STAGENET_KUBECONFIG }}
+        run: |
+          mkdir -p ~/.kube
+          echo "$KUBECONFIG_B64" | base64 -d > ~/.kube/config
+          chmod 600 ~/.kube/config
+          kubectl version --output=yaml | head -5
 
       - name: resolve image digest
         id: digest
