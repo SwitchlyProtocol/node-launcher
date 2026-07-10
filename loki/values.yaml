@@ -31,6 +31,12 @@ minio:
   persistence:
     size: 50Gi
 
+# cache defaults request ~9.6Gi — unschedulable on 8GB-class workers; right-size for small clusters
+chunksCache:
+  allocatedMemory: 1024
+resultsCache:
+  allocatedMemory: 512
+
 deploymentMode: SingleBinary
 
 singleBinary:

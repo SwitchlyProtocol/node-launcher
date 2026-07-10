@@ -4,6 +4,10 @@
 # providers): bitcoin-daemon on testnet3, ethereum-daemon (geth+prysm) on sepolia, and
 # stellar-daemon (quickstart) on the stellar testnet. All other chain daemons are disabled.
 #
+# The chain daemons deploy ONCE, with the genesis node; validator installs disable them and point
+# bifrost at the genesis namespace's daemon services (the deploy workflow handles this). Resources
+# are right-sized for 4vCPU/8GB workers.
+#
 # Image: the stagenet release channel on GHCR. `global.hash` (image digest) is REQUIRED by the chart
 # for validators and is resolved + set by the deploy workflow at deploy time.
 #
@@ -19,6 +23,13 @@ global:
 
 switchlynode:
   net: stagenet
+  # stagenet-scale resources (defaults are mainnet-grade and request whole workers)
+  resources:
+    requests:
+      cpu: 1
+      memory: 1536Mi
+    limits:
+      memory: 5Gi
   chainID:
     stagenet: switchly-stagenet-1
   env:
@@ -28,6 +39,12 @@ switchlynode:
     XLM_CONTRACT: "CAWZ7WYQBG2ENE7S7PAKPYVWKTOV3FMXMIKSOBBZE3JBJXTQWDGZDRGH"
 
 bifrost:
+  resources:
+    requests:
+      cpu: 500m
+      memory: 1536Mi
+    limits:
+      memory: 6Gi
   chainID:
     stagenet: switchly-stagenet-1
   env:
@@ -71,6 +88,12 @@ midgard:
 # testnet3 with txindex needs roomy storage.
 bitcoin-daemon:
   enabled: true
+  resources:
+    requests:
+      cpu: 500m
+      memory: 3Gi
+    limits:
+      memory: 5Gi
   extraArgs:
     - -testnet
     - -rpcport=8332
@@ -89,6 +112,13 @@ bitcoin-cash-daemon:
 ethereum-daemon:
   enabled: true
   network: sepolia
+  # default requests 12Gi — unschedulable on 8GB workers; sepolia fits well below this
+  resources:
+    requests:
+      cpu: 1500m
+      memory: 5Gi
+    limits:
+      memory: 6Gi
   beaconCheckpointSyncUrl: https://sepolia.beaconstate.info
   persistence:
     size:
@@ -113,5 +143,11 @@ base-daemon:
 stellar-daemon:
   enabled: true
   network: testnet
+  resources:
+    requests:
+      cpu: 500m
+      memory: 2Gi
+    limits:
+      memory: 6Gi
   persistence:
     size: 100Gi
