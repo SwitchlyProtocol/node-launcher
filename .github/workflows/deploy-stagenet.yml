@@ -121,6 +121,8 @@ jobs:
           else
             SEED="http://switchlynode.$GENESIS_NS.svc.cluster.local:1317/switchly/nodes"
             EXTRA+=(--set switchlynode.type=validator)
+            # peer: tendermint persistent peer + the RPC the node fetches genesis from
+            EXTRA+=(--set switchlynode.peer="switchlynode.$GENESIS_NS.svc.cluster.local")
             EXTRA+=(--set switchlynode.env.SWITCHLY_SEED_NODES_ENDPOINT="$SEED")
             EXTRA+=(--set bifrost.env.SWITCHLY_SEED_NODES_ENDPOINT="$SEED")
             EXTRA+=(--set bifrost.peer="gateway.$GENESIS_NS.svc.cluster.local")
