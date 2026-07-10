@@ -1,42 +1,117 @@
+# Switchly stagenet — values for the internal staging network.
+#
+# The network runs against PUBLIC TESTNETS with OUR OWN in-cluster chain nodes (no third-party RPC
+# providers): bitcoin-daemon on testnet3, ethereum-daemon (geth+prysm) on sepolia, and
+# stellar-daemon (quickstart) on the stellar testnet. All other chain daemons are disabled.
+#
+# Image: the stagenet release channel on GHCR. `global.hash` (image digest) is REQUIRED by the chart
+# for validators and is resolved + set by the deploy workflow at deploy time.
+#
+# Per-node overrides the deploy workflow sets:
+#   switchlynode.type                               genesis | validator
+#   switchlynode.env.SWITCHLY_SEED_NODES_ENDPOINT   "" on genesis, genesis API svc on validators
+#   switchlynode.env.FAUCET / SWITCHLY_STAGENET_ADMIN_ADDRESSES   (genesis, from repo variables)
+#   bifrost.peer                                    gateway svc of the genesis namespace (validators)
 global:
-  tag: stagenet-2.137.3
-  hash: 0224c8086d02647eb835e11d47386cfa5d5dbee6994b1d8c2bf02514d5f8061f
+  net: stagenet
+  tag: stagenet
+  hash: "" # image digest — set at deploy time, never defaulted
+
+switchlynode:
+  net: stagenet
+  chainID:
+    stagenet: switchly-stagenet-1
+  env:
+    SWITCHLY_SEED_NODES_ENDPOINT: ""
+    # reuse the sepolia + stellar-testnet router deployments from tools/stagenet
+    ETH_CONTRACT: "0xa8D1Ff3bfA490cf7890D0D2C0A2f5815744A279F"
+    XLM_CONTRACT: "CAWZ7WYQBG2ENE7S7PAKPYVWKTOV3FMXMIKSOBBZE3JBJXTQWDGZDRGH"
+
+bifrost:
+  chainID:
+    stagenet: switchly-stagenet-1
+  env:
+    SWITCHLY_SEED_NODES_ENDPOINT: ""
+    BIFROST_CHAINS_BTC_DISABLED: "false"
+    BIFROST_CHAINS_ETH_DISABLED: "false"
+    BIFROST_CHAINS_XLM_DISABLED: "false"
+    # stellar via the in-cluster quickstart daemon (horizon + soroban on :8000); chain_network
+    # must be explicit for the testnet network passphrase
+    BIFROST_CHAINS_XLM_RPC_HOST: "http://stellar-daemon:8000"
+    BIFROST_CHAINS_XLM_CHAIN_NETWORK: "testnet"
+    BIFROST_CHAINS_AVAX_DISABLED: "true"
+    BIFROST_CHAINS_GAIA_DISABLED: "true"
+    BIFROST_CHAINS_BSC_DISABLED: "true"
+    BIFROST_CHAINS_BASE_DISABLED: "true"
+    BIFROST_CHAINS_DOGE_DISABLED: "true"
+    BIFROST_CHAINS_BCH_DISABLED: "true"
+    BIFROST_CHAINS_LTC_DISABLED: "true"
+  bitcoinDaemon:
+    enabled: true
+    stagenet: bitcoin-daemon:8332
+  litecoinDaemon:
+    enabled: false
+  bitcoinCashDaemon:
+    enabled: false
+  dogecoinDaemon:
+    enabled: false
+  ethereumDaemon:
+    enabled: true
+    stagenet: http://ethereum-daemon:8545
+  gaiaDaemon:
+    enabled: false
+  avaxDaemon:
+    enabled: false
 
 midgard:
-  net: stagenet
-  genesis:
-    remote: ""
-  blockstore:
-    remote: https://stagenet-snapshots.ninerealms.com/snapshots/midgard-blockstore/
-    size: 20Gi
-  env:
-    MIDGARD_GENESIS_LOCAL: ""
-    MIDGARD_GENESIS_INITIAL_BLOCK_HEIGHT: ""
-    MIDGARD_GENESIS_INITIAL_BLOCK_HASH: ""
+  enabled: false
 
+# bitcoind on the PUBLIC TESTNET (testnet3): -testnet plus -rpcport pinned so the service port
+# matches the mainnet default the charts expect. txindex (required by bifrost) rules out pruning;
+# testnet3 with txindex needs roomy storage.
 bitcoin-daemon:
   enabled: true
+  extraArgs:
+    - -testnet
+    - -rpcport=8332
+  persistence:
+    size:
+      stagenet: 300Gi
 
 litecoin-daemon:
-  enabled: true
+  enabled: false
 
 bitcoin-cash-daemon:
-  enabled: true
+  enabled: false
 
+# geth + prysm on SEPOLIA (the public ethereum testnet). Set a beacon checkpoint-sync URL to sync
+# the beacon chain in minutes (see values comment; verify after sync).
 ethereum-daemon:
   enabled: true
+  network: sepolia
+  beaconCheckpointSyncUrl: https://sepolia.beaconstate.info
+  persistence:
+    size:
+      stagenet: 250Gi
 
 dogecoin-daemon:
-  enabled: true
+  enabled: false
 
 gaia-daemon:
-  enabled: true
+  enabled: false
 
 avalanche-daemon:
-  enabled: true
+  enabled: false
 
 binance-smart-daemon:
-  enabled: true
+  enabled: false
 
 base-daemon:
   enabled: false
+
+# stellar quickstart (core + horizon + soroban-rpc) on the public stellar TESTNET
+stellar-daemon:
+  enabled: true
+  network: testnet
+  persistence:
+    size: 100Gi

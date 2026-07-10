@@ -1,82 +1,50 @@
 # Default values for stellar-daemon.
-# This is a YAML-formatted file.
-# Declare variables to be passed into your templates.
-
-net: mainnet
+#
+# Runs the stellar/quickstart image: stellar-core + horizon + soroban-rpc + internal database in a
+# single container, serving everything on :8000 (soroban-rpc under /soroban/rpc — the layout the
+# switchly bifrost stellar client expects). `network` selects the public stellar network.
 
 replicaCount: 1
 
+net: mainnet
+
+# stellar network: "testnet" or "pubnet" (switchly stagenet runs testnet)
+network: pubnet
+
 image:
-  stellar:
-    name: stellar/stellar-core
-    tag: "" # When tag is empty it defaults to the chart appVersion.
-    hash: "" # Add the appropriate hash for your stellar-core image
-  horizon:
-    name: stellar/horizon
-    tag: "latest" # Specify the desired version
-    hash: "" # Add the appropriate hash for your horizon image
+  name: stellar/quickstart
+  tag: testing
+  hash: "" # optionally pin a digest; empty uses the tag only
 
 imagePullSecrets: []
 nameOverride: ""
 fullnameOverride: ""
 
 podSecurityContext: {}
-  # fsGroup: 2000
 
 securityContext: {}
-  # capabilities:
-  #   drop:
-  #   - ALL
-  # readOnlyRootFilesystem: true
-  # runAsNonRoot: true
-  # runAsUser: 1000
 
 service:
   type: ClusterIP
-  port: 8000 # Default Horizon API port
-
-ingress:
-  enabled: false
-  annotations: {}
-    # kubernetes.io/ingress.class: nginx
-    # cert-manager.io/cluster-issuer: letsencrypt-production
-  hosts: []
-    # - host: horizon.example.com
-    #   paths:
-    #   - path: /
-    #     backend:
-    #       serviceName: horizon
-    #       servicePort: 8000
-  tls: []
-    # - secretName: horizon-tls
-    #   hosts:
-    #     - horizon.example.com
+  port: 8000 # horizon + soroban-rpc
 
 persistence:
   enabled: true
-  size:
-    testnet: 100Gi
-    mainnet: 400Gi  # Stellar requires less storage than Ethereum
+  size: 100Gi
   accessMode: ReadWriteOnce
+  # existingClaim: your-pvc
   # storageClass: "-"
+  # hostPath: /host-path
 
 resources:
-  limits:
-    # cpu: 1
-    memory: 8Gi  # Stellar has lower memory requirements
   requests:
     cpu: 1
     memory: 4Gi
+  limits:
+    memory: 8Gi
 
 nodeSelector: {}
 
 tolerations: []
 
 affinity: {}
-
-# necessary for lint
-global:
-  images:
-    alpine:
-      tag: foo
-      hash: bar

@@ -2,16 +2,14 @@
 {{/*
 Expand the name of the chart.
 */}}
-{{- define "ethereum-daemon.name" -}}
+{{- define "stellar-daemon.name" -}}
 {{- default .Chart.Name .Values.nameOverride | trunc 63 | trimSuffix "-" -}}
 {{- end -}}
 
 {{/*
 Create a default fully qualified app name.
-We truncate at 63 chars because some Kubernetes name fields are limited to this (by the DNS naming spec).
-If release name contains chart name it will be used as a full name.
 */}}
-{{- define "ethereum-daemon.fullname" -}}
+{{- define "stellar-daemon.fullname" -}}
 {{- if .Values.fullnameOverride -}}
 {{- .Values.fullnameOverride | trunc 63 | trimSuffix "-" -}}
 {{- else -}}
@@ -27,38 +25,31 @@ If release name contains chart name it will be used as a full name.
 {{/*
 Create chart name and version as used by the chart label.
 */}}
-{{- define "ethereum-daemon.chart" -}}
+{{- define "stellar-daemon.chart" -}}
 {{- printf "%s-%s" .Chart.Name .Chart.Version | replace "+" "_" | trunc 63 | trimSuffix "-" -}}
 {{- end -}}
 
 {{/*
 Common labels
 */}}
-{{- define "ethereum-daemon.labels" -}}
-helm.sh/chart: {{ include "ethereum-daemon.chart" . }}
-{{ include "ethereum-daemon.selectorLabels" . }}
-app.kubernetes.io/version: {{ include "daemon.tag" . | quote }}
+{{- define "stellar-daemon.labels" -}}
+helm.sh/chart: {{ include "stellar-daemon.chart" . }}
+{{ include "stellar-daemon.selectorLabels" . }}
+app.kubernetes.io/version: {{ .Values.image.tag | quote }}
 app.kubernetes.io/managed-by: {{ .Release.Service }}
 {{- end -}}
 
 {{/*
 Selector labels
 */}}
-{{- define "ethereum-daemon.selectorLabels" -}}
-app.kubernetes.io/name: {{ include "ethereum-daemon.name" . }}
+{{- define "stellar-daemon.selectorLabels" -}}
+app.kubernetes.io/name: {{ include "stellar-daemon.name" . }}
 app.kubernetes.io/instance: {{ .Release.Name }}
-{{- end -}}
-
-{{/*
-Tag
-*/}}
-{{- define "daemon.tag" -}}
-    {{ .Values.image.eth.tag | default .Chart.AppVersion }}
 {{- end -}}
 
 {{/*
 Net
 */}}
-{{- define "ethereum-daemon.net" -}}
+{{- define "stellar-daemon.net" -}}
 {{- default .Values.net .Values.global.net -}}
 {{- end -}}

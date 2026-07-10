@@ -6,6 +6,10 @@ replicaCount: 1
 
 net: mainnet
 
+# extra bitcoind arguments appended to the default args, e.g. ["-testnet", "-rpcport=8332"] to run
+# against the public bitcoin testnet (switchly stagenet does this)
+extraArgs: []
+
 image:
   name: registry.gitlab.com/thorchain/devops/node-launcher
   tag: "bitcoin-daemon-26.2"

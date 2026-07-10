@@ -75,3 +75,8 @@ dependencies:
     repository: file://../base-daemon
     version: 0.1.0
     condition: base-daemon.enabled
+
+  - name: stellar-daemon
+    repository: file://../stellar-daemon
+    version: 0.1.0
+    condition: stellar-daemon.enabled
