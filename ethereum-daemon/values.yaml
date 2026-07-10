@@ -21,12 +21,14 @@ replicaCount: 1
 image:
   eth:
     name: ethereum/client-go
-    tag: "" # When tag is empty it defaults to the chart appVersion.
-    hash: 631e7ed225c7f56c97d0b9fa3f533d4f8b42c1ecc9509ce0cf1225fecd47c708
+    # v1.14.x (the old pin) predates the 2025/26 fork schedule and cannot follow current networks
+    tag: v1.16.4
+    hash: cfa9726d35e21435429933bdebf9aa92b9fe5bb9cc7074320f4f9d6a096a237a
   prysm:
     name: gcr.io/prysmaticlabs/prysm/beacon-chain
-    tag: v5.2.0
-    hash: 38e95eaff66a058c8484b2432a951898e792d34c5192307680a202a527df37a3
+    # v5.2.0 rejects checkpoint states from the current fork schedule (unknown version 0x90000075)
+    tag: v6.1.0
+    hash: 103c71cd640cc3202dad98604568dbe8a95a5681c4739afd4fb72e84f062023c
 
 imagePullSecrets: []
 nameOverride: ""
