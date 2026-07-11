@@ -123,6 +123,12 @@ jobs:
             EXTRA+=(--set switchlynode.type=validator)
             # peer: tendermint persistent peer + the RPC the node fetches genesis from
             EXTRA+=(--set switchlynode.peer="switchlynode.$GENESIS_NS.svc.cluster.local")
+            # the genesis node registers a worker-node IP on-chain where p2p is not reachable, so
+            # the seeds mechanism cannot produce dialable peers in-cluster — pin the tendermint
+            # persistent peer to the genesis service directly (validated live on the cluster)
+            GENESIS_NODE_ID=$(kubectl -n "$GENESIS_NS" exec deploy/switchlynode -- curl -s http://localhost:27147/status | jq -r '.result.node_info.id')
+            [ -n "$GENESIS_NODE_ID" ] && [ "$GENESIS_NODE_ID" != "null" ] || { echo "::error::could not resolve genesis node id"; exit 1; }
+            EXTRA+=(--set switchlynode.env.SWITCHLY_TENDERMINT_P2P_PERSISTENT_PEERS="$GENESIS_NODE_ID@switchlynode.$GENESIS_NS.svc.cluster.local:27146")
             EXTRA+=(--set switchlynode.env.SWITCHLY_SEED_NODES_ENDPOINT="$SEED")
             EXTRA+=(--set bifrost.env.SWITCHLY_SEED_NODES_ENDPOINT="$SEED")
             EXTRA+=(--set bifrost.peer="gateway.$GENESIS_NS.svc.cluster.local")
