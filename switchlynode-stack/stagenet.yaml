@@ -54,12 +54,19 @@ bifrost:
     stagenet: switchly-stagenet-1
   env:
     SWITCHLY_SEED_NODES_ENDPOINT: ""
-    BIFROST_CHAINS_BTC_DISABLED: "false"
+    # ETH + XLM run against PUBLIC TESTNET endpoints (no in-cluster daemons — stellar-core + geth
+    # full nodes do not fit the validator node pool). ETH -> a public Sepolia JSON-RPC (block
+    # scanning, no wallet needed). XLM -> empty RPC host + chain_network=testnet, which makes the
+    # stellar client fall back to the public testnet horizon + soroban endpoints.
+    # BTC is DISABLED: bifrost's UTXO client needs wallet RPCs (createwallet/importaddress/
+    # listunspent) that a shared public bitcoind cannot serve, so BTC requires its own node.
+    BIFROST_CHAINS_BTC_DISABLED: "true"
+    BIFROST_CHAINS_BTC_RPC_HOST: ""
     BIFROST_CHAINS_ETH_DISABLED: "false"
+    BIFROST_CHAINS_ETH_RPC_HOST: "https://ethereum-sepolia-rpc.publicnode.com"
+    BIFROST_CHAINS_ETH_BLOCK_SCANNER_RPC_HOST: "https://ethereum-sepolia-rpc.publicnode.com"
     BIFROST_CHAINS_XLM_DISABLED: "false"
-    # stellar via the in-cluster quickstart daemon (horizon + soroban on :8000); chain_network
-    # must be explicit for the testnet network passphrase
-    BIFROST_CHAINS_XLM_RPC_HOST: "http://stellar-daemon:8000"
+    BIFROST_CHAINS_XLM_RPC_HOST: ""
     BIFROST_CHAINS_XLM_CHAIN_NETWORK: "testnet"
     BIFROST_CHAINS_AVAX_DISABLED: "true"
     BIFROST_CHAINS_GAIA_DISABLED: "true"
@@ -69,9 +76,9 @@ bifrost:
     BIFROST_CHAINS_BCH_DISABLED: "true"
     BIFROST_CHAINS_LTC_DISABLED: "true"
     BIFROST_CHAINS_XRP_DISABLED: "true"
+  # no in-cluster chain daemons — bifrost uses public testnet endpoints (see env above)
   bitcoinDaemon:
-    enabled: true
-    stagenet: bitcoin-daemon:8332
+    enabled: false
   litecoinDaemon:
     enabled: false
   bitcoinCashDaemon:
@@ -79,8 +86,7 @@ bifrost:
   dogecoinDaemon:
     enabled: false
   ethereumDaemon:
-    enabled: true
-    stagenet: http://ethereum-daemon:8545
+    enabled: false
   gaiaDaemon:
     enabled: false
   avaxDaemon:
@@ -90,22 +96,11 @@ midgard:
   enabled: false
 
 # bitcoind on the PUBLIC TESTNET (testnet3): -testnet plus -rpcport pinned so the service port
-# matches the mainnet default the charts expect. txindex (required by bifrost) rules out pruning;
-# testnet3 with txindex needs roomy storage.
+# in-cluster chain daemons disabled — bifrost uses public testnet endpoints (see bifrost.env).
+# A full bitcoind/geth/stellar-core does not fit the validator node pool; run them on a dedicated
+# memory-optimized node pool if own-nodes are needed later.
 bitcoin-daemon:
-  enabled: true
-  resources:
-    requests:
-      cpu: 500m
-      memory: 3Gi
-    limits:
-      memory: 5Gi
-  extraArgs:
-    - -testnet
-    - -rpcport=8332
-  persistence:
-    size:
-      stagenet: 300Gi
+  enabled: false
 
 litecoin-daemon:
   enabled: false
@@ -113,22 +108,8 @@ litecoin-daemon:
 bitcoin-cash-daemon:
   enabled: false
 
-# geth + prysm on SEPOLIA (the public ethereum testnet). Set a beacon checkpoint-sync URL to sync
-# the beacon chain in minutes (see values comment; verify after sync).
 ethereum-daemon:
-  enabled: true
-  network: sepolia
-  # default requests 12Gi — unschedulable on 8GB workers; sepolia fits well below this
-  resources:
-    requests:
-      cpu: 1500m
-      memory: 5Gi
-    limits:
-      memory: 6Gi
-  beaconCheckpointSyncUrl: https://checkpoint-sync.sepolia.ethpandaops.io
-  persistence:
-    size:
-      stagenet: 250Gi
+  enabled: false
 
 dogecoin-daemon:
   enabled: false
@@ -145,15 +126,5 @@ binance-smart-daemon:
 base-daemon:
   enabled: false
 
-# stellar quickstart (core + horizon + soroban-rpc) on the public stellar TESTNET
 stellar-daemon:
-  enabled: true
-  network: testnet
-  resources:
-    requests:
-      cpu: 500m
-      memory: 2Gi
-    limits:
-      memory: 6Gi
-  persistence:
-    size: 100Gi
+  enabled: false

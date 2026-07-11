@@ -135,14 +135,9 @@ jobs:
             # service, not the gateway (pointing at the gateway left the p2p mesh empty and bifrost
             # fataled on the seed-file fallback)
             EXTRA+=(--set bifrost.peer="bifrost.$GENESIS_NS.svc.cluster.local")
-            # chain daemons run ONCE, in the genesis namespace — validators share them instead of
-            # deploying their own copies (6x the daemons would blow cluster capacity + storage)
-            EXTRA+=(--set bitcoin-daemon.enabled=false)
-            EXTRA+=(--set ethereum-daemon.enabled=false)
-            EXTRA+=(--set stellar-daemon.enabled=false)
-            EXTRA+=(--set bifrost.bitcoinDaemon.stagenet="bitcoin-daemon.$GENESIS_NS.svc.cluster.local:8332")
-            EXTRA+=(--set bifrost.ethereumDaemon.stagenet="http://ethereum-daemon.$GENESIS_NS.svc.cluster.local:8545")
-            EXTRA+=(--set bifrost.env.BIFROST_CHAINS_XLM_RPC_HOST="http://stellar-daemon.$GENESIS_NS.svc.cluster.local:8000")
+            # chain daemons are disabled in stagenet.yaml — bifrost uses public testnet endpoints
+            # (ETH Sepolia RPC + Stellar testnet), inherited from the values file, so validators
+            # need no per-node daemon wiring.
           fi
 
           helm upgrade --install "$NS" ./switchlynode-stack -n "$NS" \
