@@ -67,11 +67,21 @@ NAME=stagenet-validator-1 TYPE=validator NET=stagenet make install
 
 6. Bond each new validator from the master wallet and perform the standard initialization commands (https://docs.switchly.org/switchlynodes/joining).
 
-7. Set the churn interval with admin mimir to begin churning and get more active nodes. After first churn increase the interval or set `HaltChurning` to `1` to prevent migration gas waste. Example:
+7. Set the churn interval to begin churning and get more active nodes. After first churn increase the interval (e.g. `43200` ≈ 3 days, matching mainnet) or set `HaltChurning` to `1` to prevent migration gas waste.
 
-```bash
-switchlynode tx switchly mimir ChurnInterval --from stagenet-master --chain-id <your-chain-id> --node http://localhost:27147 -- 100
-```
+   **Mimir is set by active-node vote, not by the admin/master wallet.** The `MsgMimir` handler
+   authorizes only *active validator node* signers (`validateMimirAuth` → `isSignedByActiveNodeAccounts`);
+   a master-wallet mimir tx is rejected with `unauthorized`. Cast the same vote from a majority of
+   the active nodes — the node-launcher charts ship an in-pod helper:
+
+   ```bash
+   # run against a majority of active validators (each in its own namespace)
+   kubectl exec -n <node-namespace> -c switchlynode deploy/switchlynode -- \
+     /kube-scripts/mimir.sh CHURNINTERVAL 43200
+   ```
+
+   (`SWITCHLY_STAGENET_ADMIN_ADDRESSES` and `FAUCET` only affect the genesis file — the faucet's
+   initial balance allocation — they grant no runtime mimir/admin authority in the current build.)
 
 8. Create pools and perform whatever testing you desire. Network usage docs: https://dev.switchly.org/.
 
