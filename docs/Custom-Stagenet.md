@@ -87,6 +87,21 @@ NAME=stagenet-validator-1 TYPE=validator NET=stagenet make install
 
 ## Other Notes
 
+- **Genesis node resilience.** The genesis node is the chain *origin* — its entrypoint initialises a
+  brand-new chain when no local genesis is present. If its data volume is ever lost (e.g. a PVC
+  resize/recreate) it cannot rejoin the running network: it re-initialises an empty, divergent chain
+  at height 0 and never blocksyncs. Two precautions: (1) never delete the genesis `switchlynode` PVC
+  of a live network; (2) once validators are up, give genesis outbound persistent peers so a plain
+  pod restart can catch up —
+  `kubectl -n <genesis-ns> set env deploy/switchlynode SWITCHLY_TENDERMINT_P2P_PERSISTENT_PEERS="<id>@switchlynode.<validator-ns>.svc.cluster.local:27146,..."`.
+  Losing genesis is not fatal to the network: it simply churns out and the validator set continues
+  (BFT holds as long as ≥ `MinimumNodesForBFT` remain active).
+
+- **Grafana dashboard.** A "Switchly Stagenet — Network & TSS" dashboard (consensus height/rate,
+  mempool, committed txs/s, block interval, and TSS keygen/keysign latency) is provisioned by the
+  `prometheus` chart (`make install-prometheus`), alongside the existing SwitchlyNode boards. Reach
+  Grafana with `kubectl -n prometheus-system port-forward svc/prometheus-grafana 3000:80`.
+
 - You can share a single set of daemons in a separate namespace for the genesis node and all validators. See related docs in [Multi-Validator-Cluster.md](Multi-Validator-Cluster.md).
 
 - You can run with a subset of external chains by flagging off undesired ones in `switchlynode-stack/stagenet.yaml`. Example additions to disable BTC:

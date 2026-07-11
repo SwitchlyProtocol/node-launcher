@@ -200,6 +200,438 @@ grafana:
             path: /var/lib/grafana/dashboards/default
   dashboards:
     default:
+      stagenet:
+        json: |
+          {
+            "annotations": {
+              "list": []
+            },
+            "editable": true,
+            "graphTooltip": 1,
+            "refresh": "10s",
+            "schemaVersion": 39,
+            "tags": [
+              "switchly",
+              "stagenet"
+            ],
+            "time": {
+              "from": "now-30m",
+              "to": "now"
+            },
+            "timezone": "browser",
+            "title": "Switchly Stagenet \u2014 Network & TSS",
+            "uid": "switchly-stagenet",
+            "templating": {
+              "list": []
+            },
+            "panels": [
+              {
+                "type": "row",
+                "title": "Consensus",
+                "id": 100,
+                "gridPos": {
+                  "h": 1,
+                  "w": 24,
+                  "x": 0,
+                  "y": 0
+                },
+                "collapsed": false
+              },
+              {
+                "type": "stat",
+                "title": "Active validators",
+                "id": 1,
+                "gridPos": {
+                  "h": 4,
+                  "w": 6,
+                  "x": 0,
+                  "y": 1
+                },
+                "datasource": "Prometheus",
+                "targets": [
+                  {
+                    "expr": "max(tendermint_consensus_validators)",
+                    "refId": "A"
+                  }
+                ],
+                "options": {
+                  "reduceOptions": {
+                    "calcs": [
+                      "lastNotNull"
+                    ]
+                  },
+                  "colorMode": "value",
+                  "graphMode": "area"
+                },
+                "fieldConfig": {
+                  "defaults": {
+                    "thresholds": {
+                      "mode": "absolute",
+                      "steps": [
+                        {
+                          "color": "red",
+                          "value": null
+                        },
+                        {
+                          "color": "orange",
+                          "value": 4
+                        },
+                        {
+                          "color": "green",
+                          "value": 5
+                        }
+                      ]
+                    }
+                  }
+                }
+              },
+              {
+                "type": "stat",
+                "title": "Chain height",
+                "id": 2,
+                "gridPos": {
+                  "h": 4,
+                  "w": 6,
+                  "x": 6,
+                  "y": 1
+                },
+                "datasource": "Prometheus",
+                "targets": [
+                  {
+                    "expr": "max(tendermint_consensus_height)",
+                    "refId": "A"
+                  }
+                ],
+                "options": {
+                  "reduceOptions": {
+                    "calcs": [
+                      "lastNotNull"
+                    ]
+                  },
+                  "colorMode": "none",
+                  "graphMode": "none"
+                }
+              },
+              {
+                "type": "stat",
+                "title": "Block rate",
+                "id": 3,
+                "gridPos": {
+                  "h": 4,
+                  "w": 6,
+                  "x": 12,
+                  "y": 1
+                },
+                "datasource": "Prometheus",
+                "targets": [
+                  {
+                    "expr": "max(rate(tendermint_consensus_height[2m]))",
+                    "refId": "A"
+                  }
+                ],
+                "options": {
+                  "reduceOptions": {
+                    "calcs": [
+                      "lastNotNull"
+                    ]
+                  },
+                  "colorMode": "value",
+                  "graphMode": "area"
+                },
+                "fieldConfig": {
+                  "defaults": {
+                    "unit": "ops",
+                    "decimals": 2,
+                    "thresholds": {
+                      "mode": "absolute",
+                      "steps": [
+                        {
+                          "color": "red",
+                          "value": null
+                        },
+                        {
+                          "color": "green",
+                          "value": 0.05
+                        }
+                      ]
+                    }
+                  }
+                }
+              },
+              {
+                "type": "stat",
+                "title": "Nodes up",
+                "id": 4,
+                "gridPos": {
+                  "h": 4,
+                  "w": 6,
+                  "x": 18,
+                  "y": 1
+                },
+                "datasource": "Prometheus",
+                "targets": [
+                  {
+                    "expr": "count(count by (namespace) (tendermint_consensus_height))",
+                    "refId": "A"
+                  }
+                ],
+                "options": {
+                  "reduceOptions": {
+                    "calcs": [
+                      "lastNotNull"
+                    ]
+                  },
+                  "colorMode": "value",
+                  "graphMode": "none"
+                }
+              },
+              {
+                "type": "timeseries",
+                "title": "Chain height by node",
+                "id": 10,
+                "gridPos": {
+                  "h": 8,
+                  "w": 12,
+                  "x": 0,
+                  "y": 5
+                },
+                "datasource": "Prometheus",
+                "targets": [
+                  {
+                    "expr": "tendermint_consensus_height",
+                    "refId": "A",
+                    "legendFormat": "{{namespace}}"
+                  }
+                ],
+                "fieldConfig": {
+                  "defaults": {
+                    "unit": "none",
+                    "custom": {
+                      "drawStyle": "line",
+                      "fillOpacity": 0,
+                      "showPoints": "never"
+                    }
+                  }
+                },
+                "options": {
+                  "legend": {
+                    "displayMode": "list",
+                    "placement": "bottom"
+                  },
+                  "tooltip": {
+                    "mode": "multi"
+                  }
+                }
+              },
+              {
+                "type": "timeseries",
+                "title": "Mempool size by node",
+                "id": 11,
+                "gridPos": {
+                  "h": 8,
+                  "w": 12,
+                  "x": 12,
+                  "y": 5
+                },
+                "datasource": "Prometheus",
+                "targets": [
+                  {
+                    "expr": "tendermint_mempool_size",
+                    "refId": "A",
+                    "legendFormat": "{{namespace}}"
+                  }
+                ],
+                "fieldConfig": {
+                  "defaults": {
+                    "unit": "none",
+                    "custom": {
+                      "drawStyle": "line",
+                      "fillOpacity": 10,
+                      "showPoints": "never"
+                    }
+                  }
+                },
+                "options": {
+                  "legend": {
+                    "displayMode": "list",
+                    "placement": "bottom"
+                  },
+                  "tooltip": {
+                    "mode": "multi"
+                  }
+                }
+              },
+              {
+                "type": "timeseries",
+                "title": "Committed txs/s (consensus)",
+                "id": 12,
+                "gridPos": {
+                  "h": 8,
+                  "w": 12,
+                  "x": 0,
+                  "y": 13
+                },
+                "datasource": "Prometheus",
+                "targets": [
+                  {
+                    "expr": "max(rate(tendermint_consensus_num_txs[1m]))",
+                    "refId": "A",
+                    "legendFormat": "txs/s"
+                  }
+                ],
+                "fieldConfig": {
+                  "defaults": {
+                    "unit": "ops",
+                    "custom": {
+                      "drawStyle": "line",
+                      "fillOpacity": 10,
+                      "showPoints": "never"
+                    }
+                  }
+                },
+                "options": {
+                  "legend": {
+                    "displayMode": "list",
+                    "placement": "bottom"
+                  },
+                  "tooltip": {
+                    "mode": "single"
+                  }
+                }
+              },
+              {
+                "type": "timeseries",
+                "title": "Block interval (p90, s)",
+                "id": 13,
+                "gridPos": {
+                  "h": 8,
+                  "w": 12,
+                  "x": 12,
+                  "y": 13
+                },
+                "datasource": "Prometheus",
+                "targets": [
+                  {
+                    "expr": "histogram_quantile(0.9, sum(rate(tendermint_consensus_block_interval_seconds_bucket[5m])) by (le))",
+                    "refId": "A",
+                    "legendFormat": "p90 interval"
+                  }
+                ],
+                "fieldConfig": {
+                  "defaults": {
+                    "unit": "s",
+                    "custom": {
+                      "drawStyle": "line",
+                      "fillOpacity": 10,
+                      "showPoints": "never"
+                    }
+                  }
+                },
+                "options": {
+                  "legend": {
+                    "displayMode": "list",
+                    "placement": "bottom"
+                  },
+                  "tooltip": {
+                    "mode": "single"
+                  }
+                }
+              },
+              {
+                "type": "row",
+                "title": "Bifrost / TSS",
+                "id": 101,
+                "gridPos": {
+                  "h": 1,
+                  "w": 24,
+                  "x": 0,
+                  "y": 21
+                },
+                "collapsed": false
+              },
+              {
+                "type": "timeseries",
+                "title": "TSS keysign p90 (s)",
+                "id": 20,
+                "gridPos": {
+                  "h": 8,
+                  "w": 12,
+                  "x": 0,
+                  "y": 22
+                },
+                "datasource": "Prometheus",
+                "targets": [
+                  {
+                    "expr": "histogram_quantile(0.9, sum(rate(Tss_Tss_keysign_time_bucket[10m])) by (le))",
+                    "refId": "A",
+                    "legendFormat": "keysign p90"
+                  }
+                ],
+                "fieldConfig": {
+                  "defaults": {
+                    "unit": "s",
+                    "custom": {
+                      "drawStyle": "line",
+                      "fillOpacity": 10,
+                      "showPoints": "never"
+                    }
+                  }
+                },
+                "options": {
+                  "legend": {
+                    "displayMode": "list",
+                    "placement": "bottom"
+                  },
+                  "tooltip": {
+                    "mode": "single"
+                  }
+                }
+              },
+              {
+                "type": "timeseries",
+                "title": "TSS keygen / keysign rate",
+                "id": 21,
+                "gridPos": {
+                  "h": 8,
+                  "w": 12,
+                  "x": 12,
+                  "y": 22
+                },
+                "datasource": "Prometheus",
+                "targets": [
+                  {
+                    "expr": "sum(rate(Tss_Tss_keygen[10m]))",
+                    "refId": "A",
+                    "legendFormat": "keygen"
+                  },
+                  {
+                    "expr": "sum(rate(Tss_Tss_keysign[10m]))",
+                    "refId": "B",
+                    "legendFormat": "keysign"
+                  }
+                ],
+                "fieldConfig": {
+                  "defaults": {
+                    "unit": "ops",
+                    "custom": {
+                      "drawStyle": "line",
+                      "fillOpacity": 10,
+                      "showPoints": "never"
+                    }
+                  }
+                },
+                "options": {
+                  "legend": {
+                    "displayMode": "list",
+                    "placement": "bottom"
+                  },
+                  "tooltip": {
+                    "mode": "multi"
+                  }
+                }
+              }
+            ]
+          }
       switchly:
         json: |
           {
