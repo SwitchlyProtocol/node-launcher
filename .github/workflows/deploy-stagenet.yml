@@ -131,7 +131,10 @@ jobs:
             EXTRA+=(--set switchlynode.env.SWITCHLY_TENDERMINT_P2P_PERSISTENT_PEERS="$GENESIS_NODE_ID@switchlynode.$GENESIS_NS.svc.cluster.local:27146")
             EXTRA+=(--set switchlynode.env.SWITCHLY_SEED_NODES_ENDPOINT="$SEED")
             EXTRA+=(--set bifrost.env.SWITCHLY_SEED_NODES_ENDPOINT="$SEED")
-            EXTRA+=(--set bifrost.peer="gateway.$GENESIS_NS.svc.cluster.local")
+            # bifrost's TSS bootstrap resolves the peer's :6040/p2pid — that lives on the bifrost
+            # service, not the gateway (pointing at the gateway left the p2p mesh empty and bifrost
+            # fataled on the seed-file fallback)
+            EXTRA+=(--set bifrost.peer="bifrost.$GENESIS_NS.svc.cluster.local")
             # chain daemons run ONCE, in the genesis namespace — validators share them instead of
             # deploying their own copies (6x the daemons would blow cluster capacity + storage)
             EXTRA+=(--set bitcoin-daemon.enabled=false)

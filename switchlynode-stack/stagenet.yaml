@@ -68,6 +68,7 @@ bifrost:
     BIFROST_CHAINS_DOGE_DISABLED: "true"
     BIFROST_CHAINS_BCH_DISABLED: "true"
     BIFROST_CHAINS_LTC_DISABLED: "true"
+    BIFROST_CHAINS_XRP_DISABLED: "true"
   bitcoinDaemon:
     enabled: true
     stagenet: bitcoin-daemon:8332
