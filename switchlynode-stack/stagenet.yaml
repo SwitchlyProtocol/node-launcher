@@ -23,6 +23,11 @@ global:
 
 switchlynode:
   net: stagenet
+  # chart default is 1024Gi/node (upstream's mainnet-scale assumption) — a fresh switchly stagenet
+  # chain needs a few GB; 50Gi leaves months of headroom and keeps 6 nodes inside volume quotas
+  persistence:
+    size:
+      stagenet: 50Gi
   # stagenet-scale resources (defaults are mainnet-grade and request whole workers)
   resources:
     requests:
