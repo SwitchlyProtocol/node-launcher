@@ -93,6 +93,12 @@ spec:
               value: {{ .Values.thorApi }}
             - name: CHAIN_RPC
               value: {{ include "bifrost.thorDaemon" . }}
+            # the enshrined-bifrost gRPC on switchlynode — the ONLY path for quorum attestations
+            # (observations, network fees, solvency, errata). The binary default is localhost:50051,
+            # which is unreachable from bifrost's own pod: without this env NOTHING cross-chain ever
+            # reaches the chain (empty vault, no network fees) while everything else looks healthy.
+            - name: BIFROST_SWITCHLY_CHAIN_EBIFROST
+              value: {{ .Values.thorEbifrost }}
             - name: BTC_HOST
               value: {{ include "bifrost.bitcoinDaemon" . }}
             - name: LTC_HOST

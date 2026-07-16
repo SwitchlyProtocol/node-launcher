@@ -144,6 +144,45 @@ data:
 
     kubectl create configmap "$CONFIGMAP" --from-literal=externalIP="$external_ip" --dry-run=client -o yaml | kubectl apply -f -
 
+  peer-ids.sh: |
+    #!/bin/sh
+    # ./peer-ids.sh <config_map> <p2p_port> <rpc_port> <host1,host2,...>
+    #
+    # Resolves each peer's CURRENT tendermint node ID from its RPC /status at POD START and
+    # publishes "id@host:p2p_port" pairs to a configmap consumed as the node's persistent peers.
+    # IDs must never be baked in at install time: a peer that is ever rebuilt (new node_key.json)
+    # silently changes its node ID, and a stale ID pin fails the p2p identity handshake forever.
+
+    CONFIGMAP=$1
+    P2P_PORT=$2
+    RPC_PORT=$3
+    HOSTS=$4
+
+    PEERS=""
+    for HOST in $(echo "$HOSTS" | tr ',' ' '); do
+      ID=""
+      # bounded retries: peers may legitimately be down (not yet installed, mid-upgrade) — skip
+      # them rather than blocking the rollout; the mesh self-completes on their next restart.
+      for _ in $(seq 1 10); do
+        ID=$(curl -sf -m 5 "http://$HOST:$RPC_PORT/status" | jq -re '.result.node_info.id' 2>/dev/null) && break
+        ID=""
+        sleep 3
+      done
+      if [ -n "$ID" ]; then
+        PEERS="${PEERS:+$PEERS,}$ID@$HOST:$P2P_PORT"
+      else
+        echo "WARN: could not resolve node id for $HOST - skipping"
+      fi
+    done
+
+    if [ -z "$PEERS" ]; then
+      # nothing resolved (e.g. genesis first boot) — keep any previous value instead of wiping
+      PEERS=$(kubectl get configmap "$CONFIGMAP" -o jsonpath='{.data.persistentPeers}' 2>/dev/null || true)
+    fi
+
+    kubectl create configmap "$CONFIGMAP" --from-literal=persistentPeers="$PEERS" --dry-run=client -o yaml | kubectl apply -f -
+    echo "persistent peers: $PEERS"
+
   auto-update.sh: |
     #!/bin/bash
 

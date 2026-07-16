@@ -41,6 +41,18 @@ spec:
         - name: scripts
           mountPath: /scripts
 
+      {{- if .Values.persistentPeerHosts }}
+      # resolve peer node IDs at pod start (never bake them at install — a rebuilt peer changes ID
+      # and a stale pin silently breaks the p2p handshake; see peer-ids.sh)
+      - name: init-peer-ids
+        image: alpine/k8s:{{ .Values.global.images.alpineK8s.tag }}@sha256:{{ .Values.global.images.alpineK8s.hash }}
+        imagePullPolicy: IfNotPresent
+        command: ['/scripts/peer-ids.sh', '{{ include "switchlynode.fullname" . }}-peers', '{{ include "switchlynode.p2p" . }}', '{{ include "switchlynode.rpc" . }}', '{{ join "," .Values.persistentPeerHosts }}']
+        volumeMounts:
+        - name: scripts
+          mountPath: /scripts
+      {{- end }}
+
       {{- if .Values.haltHeight }}
       - name: halt-height
         image: {{ include "switchlynode.image" . }}
@@ -118,6 +130,11 @@ spec:
               value: "{{ .Values.statesync.snapshotInterval }}"
             - name: SWITCHLY_TENDERMINT_LOG_FORMAT
               value: "json"
+            # the enshrined-bifrost gRPC must listen beyond loopback so the bifrost POD can reach
+            # it (the binary default 127.0.0.1:50051 assumes bifrost shares the network namespace).
+            # Exposed on the ClusterIP service only — NEVER route it through the public gateway.
+            - name: SWITCHLY_COSMOS_EBIFROST_ADDRESS
+              value: "0.0.0.0:50051"
             - name: SIGNER_SEED_PHRASE
               valueFrom:
                 secretKeyRef:
@@ -126,6 +143,15 @@ spec:
             {{- range $key, $value := .Values.env }}
             - name: {{ $key }}
               value: {{ $value | quote }}
+            {{- end }}
+            {{- if .Values.persistentPeerHosts }}
+            # rendered after .Values.env so pod-start ID resolution wins over any static
+            # SWITCHLY_TENDERMINT_P2P_PERSISTENT_PEERS left in env (k8s: last duplicate wins)
+            - name: SWITCHLY_TENDERMINT_P2P_PERSISTENT_PEERS
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ include "switchlynode.fullname" . }}-peers
+                  key: persistentPeers
             {{- end }}
           ports:
             - name: api
@@ -142,6 +168,9 @@ spec:
               protocol: TCP
             - name: prometheus
               containerPort: 26660
+              protocol: TCP
+            - name: ebifrost
+              containerPort: 50051
               protocol: TCP
           livenessProbe:
             timeoutSeconds: 10

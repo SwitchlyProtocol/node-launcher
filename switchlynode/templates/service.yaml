@@ -36,5 +36,11 @@ spec:
       port: 26660
       targetPort: prometheus
       protocol: TCP
+    # enshrined-bifrost gRPC for the node's own bifrost pod — cluster-internal only, never
+    # exposed on the gateway/public LB
+    - name: ebifrost
+      port: 50051
+      targetPort: ebifrost
+      protocol: TCP
   selector:
     {{- include "switchlynode.selectorLabels" . | nindent 4 }}
