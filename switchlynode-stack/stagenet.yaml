@@ -58,10 +58,16 @@ bifrost:
     # full nodes do not fit the validator node pool). ETH -> a public Sepolia JSON-RPC (block
     # scanning, no wallet needed). XLM -> empty RPC host + chain_network=testnet, which makes the
     # stellar client fall back to the public testnet horizon + soroban endpoints.
-    # BTC is DISABLED: bifrost's UTXO client needs wallet RPCs (createwallet/importaddress/
-    # listunspent) that a shared public bitcoind cannot serve, so BTC requires its own node.
-    BIFROST_CHAINS_BTC_DISABLED: "true"
-    BIFROST_CHAINS_BTC_RPC_HOST: ""
+    # BTC runs against ONE SHARED in-cluster bitcoind on SIGNET (bifrost's UTXO client needs
+    # wallet RPCs — createwallet/importaddress/listunspent — that a public endpoint cannot serve;
+    # signet is light enough for the pool, ~1-2Gi). All nodes share the single daemon, installed
+    # once as its own release:
+    #   helm install bitcoin-daemon ./bitcoin-daemon -n switchly-stagenet-btc --create-namespace \
+    #     --set net=stagenet --set fullnameOverride=bitcoin-daemon \
+    #     --set-json 'extraArgs=["-signet","-rpcport=8332","-dbcache=300"]' \
+    #     --set resources.requests.memory=3Gi --set resources.limits.memory=4Gi
+    BIFROST_CHAINS_BTC_DISABLED: "false"
+    BIFROST_CHAINS_BTC_RPC_HOST: "bitcoin-daemon.switchly-stagenet-btc.svc.cluster.local:8332"
     BIFROST_CHAINS_ETH_DISABLED: "false"
     BIFROST_CHAINS_ETH_RPC_HOST: "https://ethereum-sepolia-rpc.publicnode.com"
     BIFROST_CHAINS_ETH_BLOCK_SCANNER_RPC_HOST: "https://ethereum-sepolia-rpc.publicnode.com"

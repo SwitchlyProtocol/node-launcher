@@ -18,6 +18,13 @@ signer:
 peer:
 peerApi:
 
+# Hostnames (svc DNS) of validator peers to hold as tendermint persistent peers. Node IDs are
+# resolved from each host's RPC /status at POD START by the init-peer-ids container — never pin
+# "id@host" strings at install time (a rebuilt peer changes node ID and the stale pin silently
+# breaks the p2p handshake). Unreachable hosts are skipped and picked up on the next restart.
+# If set, this overrides any SWITCHLY_TENDERMINT_P2P_PERSISTENT_PEERS in env.
+persistentPeerHosts: []
+
 # See docs/Switchlynode-Snapshot-Recovery-and-Storage-Management.md for details.
 statesync:
   auto: false

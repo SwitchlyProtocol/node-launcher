@@ -6,8 +6,11 @@ replicaCount: 1
 
 net: mainnet
 
-# extra bitcoind arguments appended to the default args, e.g. ["-testnet", "-rpcport=8332"] to run
-# against the public bitcoin testnet (switchly stagenet does this)
+# extra bitcoind arguments appended to the default args, e.g.
+#   ["-signet", "-rpcport=8332", "-dbcache=300"]  - bitcoin signet (switchly stagenet: light,
+#                                                   ~1-2Gi RAM, reliable faucet; keep rpcport=8332
+#                                                   so the image probes and bifrost still match)
+#   ["-testnet", "-rpcport=8332"]                 - bitcoin testnet3
 extraArgs: []
 
 image:
@@ -22,7 +25,9 @@ fullnameOverride: ""
 persistence:
   enabled: true
   size:
-    stagenet: 1000Gi
+    # signet with -txindex is ~25Gi and grows (recent signet is tx-heavy); 100Gi gives headroom
+    # without blowing the volume quota — a full disk crash-loops bitcoind mid-IBD
+    stagenet: 100Gi
     mainnet: 1000Gi
   accessMode: ReadWriteOnce
   # storageClass: "-"

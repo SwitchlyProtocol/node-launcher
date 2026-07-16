@@ -117,8 +117,20 @@ bitcoin-daemon:
 ## Switchly Stagenet CI
 
 The `Deploy stagenet` GitHub workflow automates this process against a Kubernetes cluster using
-`switchlynode-stack/stagenet.yaml` — public testnets with our own in-cluster chain daemons
-(bitcoin testnet3, ethereum sepolia via geth+prysm, stellar testnet via quickstart).
+`switchlynode-stack/stagenet.yaml` — all chains on public testnets: ETH via a public Sepolia RPC,
+XLM via the public Stellar-testnet horizon/soroban endpoints, and BTC via ONE shared in-cluster
+bitcoind on signet (bifrost's UTXO client needs wallet RPCs a public endpoint can't serve; the
+install one-liner is in `stagenet.yaml`).
+
+**P2P mesh (multi-validator-in-one-cluster):** the workflow wires every node with
+`switchlynode.persistentPeerHosts` — a full mesh over internal service DNS. Peer node IDs are
+resolved from each host's RPC `/status` at POD START by the chart's `init-peer-ids` container.
+Never pin `id@host` strings at install time: a peer that is ever rebuilt (new `node_key.json`)
+silently changes its node ID, the stale pin fails the p2p identity handshake forever, and — since
+the on-chain registered addresses are external LB IPs that hairpin unreliably in-cluster — the
+mesh cannot re-form organically after a restart. This exact failure collapsed the mesh and halted
+consensus in 2026-07. Note `catching_up=false` with an advancing height does NOT imply a healthy
+mesh — the workflow's upgrade gate also requires `n_peers >= 3` per node before moving on.
 
 **One-time setup:**
 
@@ -140,6 +152,7 @@ the standard joining flow above.
 
 **Upgrades (no state loss):** merges to `switchlynode` main publish a new `stagenet` image; run the
 workflow with `action=upgrade`. Nodes are upgraded one at a time — helm upgrade on PVC-backed state,
-wait for rollout, wait until the node reports `catching_up=false` — so the chain never halts and no
-history is lost. Consensus-version activation is coordinated on-chain by native version voting once
-a supermajority of active nodes runs the new version.
+wait for rollout, wait until the node reports `catching_up=false` AND holds a healthy p2p mesh
+(`n_peers >= 3`) — so the chain never halts and no history is lost. Consensus-version activation is
+coordinated on-chain by native version voting once a supermajority of active nodes runs the new
+version.
