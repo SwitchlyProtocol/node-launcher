@@ -130,6 +130,11 @@ spec:
               value: "{{ .Values.statesync.snapshotInterval }}"
             - name: SWITCHLY_TENDERMINT_LOG_FORMAT
               value: "json"
+            # the enshrined-bifrost gRPC must listen beyond loopback so the bifrost POD can reach
+            # it (the binary default 127.0.0.1:50051 assumes bifrost shares the network namespace).
+            # Exposed on the ClusterIP service only — NEVER route it through the public gateway.
+            - name: SWITCHLY_COSMOS_EBIFROST_ADDRESS
+              value: "0.0.0.0:50051"
             - name: SIGNER_SEED_PHRASE
               valueFrom:
                 secretKeyRef:
@@ -163,6 +168,9 @@ spec:
               protocol: TCP
             - name: prometheus
               containerPort: 26660
+              protocol: TCP
+            - name: ebifrost
+              containerPort: 50051
               protocol: TCP
           livenessProbe:
             timeoutSeconds: 10

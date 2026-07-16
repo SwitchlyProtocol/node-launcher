@@ -42,6 +42,8 @@ secretEnv:
   # - BIFROST_CHAINS_BASE_PASSWORD
 
 thorApi: switchlynode:1317
+# switchlynode's enshrined-bifrost (ebifrost) gRPC — quorum attestation submission
+thorEbifrost: switchlynode:50051
 chainID:
   mainnet: switchly-1
   stagenet: switchly-stagenet-2
