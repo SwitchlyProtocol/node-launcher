@@ -64,17 +64,21 @@ spec:
       {{- end }}
 
       {{- if default .Values.peer .Values.global.peer }}
+      # Best-effort wait for the bootstrap peer's RPC — BOUNDED so it cannot deadlock. An unbounded
+      # `until nc` halted the whole network during a mass reschedule: every node waited on the peer
+      # while the peer (genesis) waited on a parked node, and nothing booted. After the timeout the
+      # node proceeds and bootstraps via persistentPeerHosts + init-peer-ids + seed nodes anyway.
       - name: init-peer
         image: busybox:{{ .Values.global.images.busybox.tag }}@sha256:{{ .Values.global.images.busybox.hash }}
         imagePullPolicy: IfNotPresent
-        command: ['sh', '-c', 'until nc -zv {{ default .Values.peer .Values.global.peer }}:{{ include "switchlynode.rpc" . }}; do echo waiting for peer switchlynode; sleep 2; done']
+        command: ['sh', '-c', 'i=0; until nc -zv {{ default .Values.peer .Values.global.peer }}:{{ include "switchlynode.rpc" . }}; do i=$((i+1)); [ $i -ge {{ .Values.peerWaitRetries | default 150 }} ] && { echo "peer wait timed out, proceeding (mesh bootstraps via persistentPeerHosts/seeds)"; exit 0; }; echo waiting for peer switchlynode; sleep 2; done']
       {{- end }}
 
       {{- if .Values.peerApi }}
       - name: init-peer-api
         image: busybox:{{ .Values.global.images.busybox.tag }}@sha256:{{ .Values.global.images.busybox.hash }}
         imagePullPolicy: IfNotPresent
-        command: ['sh', '-c', "until nc -zv {{ .Values.peerApi }}:1317; do echo waiting for peer switchlynode; sleep 2; done"]
+        command: ['sh', '-c', 'i=0; until nc -zv {{ .Values.peerApi }}:1317; do i=$((i+1)); [ $i -ge {{ .Values.peerWaitRetries | default 150 }} ] && { echo "peer-api wait timed out, proceeding"; exit 0; }; echo waiting for peer switchlynode; sleep 2; done']
       {{- end }}
       containers:
         - name: {{ .Chart.Name }}

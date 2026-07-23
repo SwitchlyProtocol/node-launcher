@@ -18,6 +18,12 @@ signer:
 peer:
 peerApi:
 
+# Max retries (x2s) the init-peer / init-peer-api containers wait for the bootstrap peer's RPC
+# before proceeding. BOUNDED on purpose: an unbounded wait deadlocks the whole network on a mass
+# reschedule (every node waits on the peer; the peer waits on a down node). ~150 = ~5min; the node
+# still bootstraps via persistentPeerHosts + init-peer-ids + seeds after the timeout.
+peerWaitRetries: 150
+
 # Hostnames (svc DNS) of validator peers to hold as tendermint persistent peers. Node IDs are
 # resolved from each host's RPC /status at POD START by the init-peer-ids container — never pin
 # "id@host" strings at install time (a rebuilt peer changes node ID and the stale pin silently
