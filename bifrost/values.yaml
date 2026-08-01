@@ -160,7 +160,22 @@ nodeSelector: {}
 
 tolerations: []
 
-affinity: {}
+# Spread bifrost pods across worker nodes. Each validator's bifrost runs in its own namespace, so
+# podAntiAffinity MUST set namespaceSelector: {} (all namespaces) — the default namespace scoping
+# would let bifrosts from different validators co-locate. This is "preferred" (soft) because there
+# are usually more bifrosts than workers; it still spreads them roughly evenly. Critical on small
+# stagenet workers: the TSS keygen (Paillier) bursts each bifrost to multiple GB, so co-locating
+# several keygen participants on one node OOMKills them mid-ceremony (see stagenet RCA).
+affinity:
+  podAntiAffinity:
+    preferredDuringSchedulingIgnoredDuringExecution:
+      - weight: 100
+        podAffinityTerm:
+          topologyKey: kubernetes.io/hostname
+          namespaceSelector: {}
+          labelSelector:
+            matchLabels:
+              app.kubernetes.io/name: bifrost
 
 global:
   gateway:
