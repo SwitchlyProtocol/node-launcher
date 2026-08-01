@@ -44,10 +44,16 @@ switchlynode:
     XLM_CONTRACT: "CAWZ7WYQBG2ENE7S7PAKPYVWKTOV3FMXMIKSOBBZE3JBJXTQWDGZDRGH"
 
 bifrost:
+  # The TSS keygen (Paillier ECDSA DKG) bursts each bifrost to several GB. Keep the memory LIMIT
+  # generous (6Gi) so a keygen participant isn't OOMKilled mid-ceremony, and set a real memory
+  # REQUEST (2Gi) so the scheduler reserves headroom and does not overpack a worker. The chart's
+  # default podAntiAffinity (namespaceSelector: {}) additionally spreads bifrosts across workers so
+  # multiple keygen participants don't burst on the same node. On 3x8GB workers this is tight for a
+  # 6-party keygen (2 bifrosts + 2 switchlynodes per node) — if OOMs persist, use larger workers.
   resources:
     requests:
       cpu: 500m
-      memory: 1536Mi
+      memory: 2Gi
     limits:
       memory: 6Gi
   chainID:
@@ -58,6 +64,12 @@ bifrost:
     # full nodes do not fit the validator node pool). ETH -> a public Sepolia JSON-RPC (block
     # scanning, no wallet needed). XLM -> empty RPC host + chain_network=testnet, which makes the
     # stellar client fall back to the public testnet horizon + soroban endpoints.
+    # WARNING: these PUBLIC endpoints rate-limit under a multi-bifrost fleet (ETH 429, Stellar
+    # "Rate Limit Exceeded"). When a chain's init flaps (fails then recovers), bifrost self-restarts
+    # (loadchains.go closes the restart chan when a failed chain recovers) — a ~1.5min restart loop
+    # that prevents TSS keygens from completing and erodes the validator set. Before growing the
+    # active set / enabling churn, point ETH + XLM at DEDICATED endpoints (self-hosted, or a paid
+    # provider) so chain-init is stable. See the stagenet bifrost-RPC-flap RCA.
     # BTC runs against ONE SHARED in-cluster bitcoind on SIGNET (bifrost's UTXO client needs
     # wallet RPCs — createwallet/importaddress/listunspent — that a public endpoint cannot serve;
     # signet is light enough for the pool, ~1-2Gi). All nodes share the single daemon, installed
