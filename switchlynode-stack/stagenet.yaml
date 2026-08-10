@@ -80,9 +80,9 @@ bifrost:
     #     --set resources.requests.memory=3Gi --set resources.limits.memory=4Gi
     BIFROST_CHAINS_BTC_DISABLED: "false"
     BIFROST_CHAINS_BTC_RPC_HOST: "bitcoin-daemon.switchly-stagenet-btc.svc.cluster.local:8332"
-    # ETH disabled: no viable Sepolia RPC (public endpoints 429 under the scanner; self-hosted geth
-    # too large to sync). Re-enable with a managed RPC: DISABLED=false + point the RPC hosts at it.
-    BIFROST_CHAINS_ETH_DISABLED: "true"
+    # ETH on public Sepolia (publicnode). The scanner uses eth_getBlockReceipts (~2 calls/block),
+    # which publicnode sustains — no paid RPC or self-hosted node needed.
+    BIFROST_CHAINS_ETH_DISABLED: "false"
     BIFROST_CHAINS_ETH_RPC_HOST: "https://ethereum-sepolia-rpc.publicnode.com"
     BIFROST_CHAINS_ETH_BLOCK_SCANNER_RPC_HOST: "https://ethereum-sepolia-rpc.publicnode.com"
     BIFROST_CHAINS_XLM_DISABLED: "false"
