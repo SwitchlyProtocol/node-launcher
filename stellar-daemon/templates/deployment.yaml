@@ -33,6 +33,9 @@ spec:
           imagePullPolicy: IfNotPresent
           args:
             - --{{ .Values.network }}
+            # serve soroban-rpc under /soroban/rpc (the bifrost stellar client needs it); without this
+            # the quickstart serves horizon only.
+            - --enable-soroban-rpc
           env:
             - name: POSTGRES_PASSWORD
               value: {{ .Values.postgresPassword | quote }}
