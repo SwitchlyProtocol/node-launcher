@@ -41,11 +41,13 @@ persistence:
   # hostPath: /host-path
 
 resources:
+  # quickstart runs TWO captive-core instances (horizon's + soroban-rpc's) plus postgres + horizon;
+  # catchup OOMs below ~8Gi (observed 6Gi killed on testnet). 12Gi gives comfortable headroom.
   requests:
     cpu: 1
     memory: 4Gi
   limits:
-    memory: 8Gi
+    memory: 12Gi
 
 nodeSelector: {}
 

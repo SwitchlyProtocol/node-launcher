@@ -84,8 +84,14 @@ bifrost:
     BIFROST_CHAINS_ETH_RPC_HOST: "https://ethereum-sepolia-rpc.publicnode.com"
     BIFROST_CHAINS_ETH_BLOCK_SCANNER_RPC_HOST: "https://ethereum-sepolia-rpc.publicnode.com"
     BIFROST_CHAINS_XLM_DISABLED: "false"
-    BIFROST_CHAINS_XLM_RPC_HOST: ""
+    # self-hosted stellar/quickstart (stellar-daemon chart, deployed standalone below): serves horizon
+    # at / and soroban-rpc at /soroban/rpc on :8000. RPCHost drives BOTH. An own-node's getEvents index
+    # is at the tip (~0 lag) vs the public endpoint's ~36, so a small confirmation depth is safe.
+    BIFROST_CHAINS_XLM_RPC_HOST: "http://stellar-daemon.switchly-stagenet-xlm.svc.cluster.local:8000"
     BIFROST_CHAINS_XLM_CHAIN_NETWORK: "testnet"
+    # ledgers to stay behind the tip for the soroban getEvents index to catch up; self-hosted ~0 lag,
+    # so 10 (was defaulting to 50 for the throttled/lagging public endpoint). read by the bifrost process.
+    XLM_EVENT_CONFIRMATIONS: "10"
     BIFROST_CHAINS_AVAX_DISABLED: "true"
     BIFROST_CHAINS_GAIA_DISABLED: "true"
     BIFROST_CHAINS_BSC_DISABLED: "true"
@@ -118,6 +124,20 @@ midgard:
 # A full bitcoind/geth/stellar-core does not fit the validator node pool; run them on a dedicated
 # memory-optimized node pool if own-nodes are needed later.
 bitcoin-daemon:
+  enabled: false
+
+# self-hosted stellar/quickstart (stellar-core + horizon + soroban-rpc) on the stellar TESTNET,
+# deployed ONCE as its own release on the chains-pool node (mirrors the bitcoin-daemon pattern above).
+# Own-node getEvents index is at the tip (~0 lag) vs the public endpoint's ~36 + no per-IP rate limit,
+# so bifrost can run a small XLM_EVENT_CONFIRMATIONS. bifrost points at its service (see bifrost.env):
+#   helm install stellar-daemon ./stellar-daemon -n switchly-stagenet-xlm --create-namespace \
+#     --set net=stagenet --set network=testnet --set fullnameOverride=stellar-daemon \
+#     --set nodeSelector."doks\.digitalocean\.com/node-pool"=chains-pool \
+#     --set-json 'tolerations=[{"key":"workload","operator":"Equal","value":"chains","effect":"NoSchedule"}]' \
+#     --set persistence.size=60Gi
+# NOTE: quickstart needs POSTGRES_PASSWORD (the chart sets it) and ~12Gi mem limit (6Gi OOMs the two
+# captive-cores during catchup — the chart default is now 12Gi). enabled:false = not a subchart here.
+stellar-daemon:
   enabled: false
 
 litecoin-daemon:
